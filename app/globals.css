@@ -7,9 +7,29 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-manrope);
+  --font-body: var(--font-inter);
+
+  /* ─── Brand Colors ──────────────────────────────── */
+  --color-brand-primary: #1a7a1e;
+  --color-brand-600: #1a7a1e;
+  --color-brand-700: #105813;
+  --color-brand-800: #073608;
+
+  /* ─── Neutral Colors ────────────────────────────── */
+  --color-neutral-800: #252b37;
+  --color-neutral-700: #414651;
+
+  /* ─── Text Colors ───────────────────────────────── */
+  --color-body-text: #1f2a37;
+
+  /* ─── Background Colors ─────────────────────────── */
+  --color-badge: #f9fafb;
+  --color-brand-transparent: rgba(202, 254, 203, 0.1);
+
+  /* ─── Shadcn semantic color mappings ─────────────── */
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,24 +69,26 @@
 }
 
 :root {
+  /* ─── Herbal Grove brand overrides ────────────── */
   --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --foreground: oklch(0.248 0.022 264.5);       /* #252b37 */
+  --primary: oklch(0.476 0.152 145.5);           /* #1a7a1e */
+  --primary-foreground: oklch(1 0 0);            /* white */
+  --muted: oklch(0.967 0.001 286.4);
+  --muted-foreground: oklch(0.554 0.014 247.5);
+  --border: oklch(0.913 0.008 264.5);
+  --ring: oklch(0.476 0.152 145.5);              /* matches primary */
+
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.248 0.022 264.5);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
+  --popover-foreground: oklch(0.248 0.022 264.5);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -75,7 +97,7 @@
   --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary: oklch(0.476 0.152 145.5);   /* brand green */
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
@@ -90,7 +112,7 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
+  --primary: oklch(0.6 0.18 145.5);              /* lighter brand green for dark */
   --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
@@ -101,7 +123,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --ring: oklch(0.6 0.18 145.5);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -109,7 +131,7 @@
   --chart-5: oklch(0.269 0 0);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary: oklch(0.6 0.18 145.5);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
@@ -122,9 +144,18 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body;
   }
   html {
-    @apply font-sans;
+    @apply font-body;
   }
+}
+
+/* ─── Layout Utilities ─────────────────────────── */
+.section-padding {
+  @apply px-5 md:px-10 xl:px-[160px];
+}
+
+.content-width {
+  @apply max-w-[1120px] mx-auto w-full;
 }
