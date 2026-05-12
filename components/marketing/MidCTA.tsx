@@ -17,7 +17,7 @@ export default function MidCTA() {
             step by step.
           </p>
         </div>
-        <Button className="bg-brand-primary hover:bg-brand-700 text-white rounded-full px-8 py-3 text-base font-medium flex-shrink-0">
+        <Button className="bg-brand-primary hover:bg-brand-700 text-white rounded-full px-8 py-3 text-base font-medium flex-shrink-0 h-12">
           Get Started
         </Button>
       </div>

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Img from "@/components/marketing/img.png"
 import { Button } from "@/components/ui/button";
 import HerbScanCard from "@/components/marketing/HerbScanCard";
 
@@ -77,7 +78,7 @@ export default function Hero() {
 
         {/* Right column — HerbScanCard */}
         <div className="w-full max-w-[420px] lg:w-[480px] lg:max-w-none flex-shrink-0">
-          <HerbScanCard />
+          <Image src={Img} alt="Image" />
         </div>
       </div>
     </section>

@@ -122,7 +122,7 @@ export default function Navbar() {
           >
             Log in
           </Link>
-          <Button className="bg-brand-primary hover:bg-brand-700 text-white rounded-full px-6 py-2 font-medium">
+          <Button className="bg-brand-primary hover:bg-brand-700 text-white rounded-full px-6 py-2 font-medium h-12">
             Get Started
           </Button>
         </div>
@@ -173,7 +173,7 @@ export default function Navbar() {
                     Log in
                   </Link>
                   <Button
-                    className="bg-brand-primary hover:bg-brand-700 text-white rounded-full py-2 font-medium w-full"
+                    className="bg-brand-primary hover:bg-brand-700 text-white rounded-full py-2 font-medium w-full h-12"
                     onClick={() => setSheetOpen(false)}
                   >
                     Get Started

@@ -83,7 +83,7 @@ export default function Community() {
             <div className="flex items-center gap-2 md:gap-4 w-full">
               <button
                 onClick={prev}
-                className="opacity-70 hover:opacity-100 transition-opacity flex-shrink-0"
+                className="opacity-70 hover:opacity-100 transition-opacity flex-shrink-0 cursor-pointer"
                 aria-label="Previous testimonial"
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -103,7 +103,7 @@ export default function Community() {
 
               <button
                 onClick={next}
-                className="opacity-70 hover:opacity-100 transition-opacity flex-shrink-0"
+                className="opacity-70 hover:opacity-100 transition-opacity flex-shrink-0 cursor-pointer"
                 aria-label="Next testimonial"
               >
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">

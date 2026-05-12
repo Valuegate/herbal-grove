@@ -15,7 +15,7 @@ export default function BottomCTA() {
         <p className="text-lg md:text-xl text-neutral-800">
           Get guided, expert-reviewed information — whenever you&apos;re unsure.
         </p>
-        <Button className="bg-brand-primary hover:bg-brand-700 text-white rounded-full px-12 py-4 text-xl font-bold">
+        <Button className="bg-brand-primary hover:bg-brand-700 text-white rounded-full px-12 py-4 text-xl font-bold h-12">
           Get Started
         </Button>
       </div>

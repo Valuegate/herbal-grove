@@ -83,6 +83,11 @@ export default function Footer() {
           </div>
         </div>
       </div>
+      <div className="flex justify-center">
+        <p className="text-white text-center">
+          © Copyright 2026. All rights reserved by Herbamind. A Product by ValueGate Consulting.
+        </p>
+      </div>
     </footer>
   );
 }
