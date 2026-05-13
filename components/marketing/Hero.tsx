@@ -2,6 +2,7 @@ import Image from "next/image";
 import Img from "@/components/marketing/img.png"
 import { Button } from "@/components/ui/button";
 import HerbScanCard from "@/components/marketing/HerbScanCard";
+import Link from "next/link";
 
 /**
  * Hero — main landing section with headline, subtext, CTA, trust avatars,
@@ -47,12 +48,14 @@ export default function Hero() {
             get trusted guidance — all in one place.
           </p>
 
-          <Button
-            size="lg"
-            className="rounded-full bg-brand-primary hover:bg-brand-700 text-white font-bold text-xl px-12 py-6 h-auto shadow-[0px_0px_12px_0px_rgba(0,0,0,0.25)] w-fit"
-          >
-            Get Started
-          </Button>
+          <Link href="/sign-up">
+            <Button
+              size="lg"
+              className="rounded-full bg-brand-primary hover:bg-brand-700 text-white font-bold text-xl px-12 py-6 h-auto shadow-[0px_0px_12px_0px_rgba(0,0,0,0.25)] w-fit"
+            >
+              Get Started
+            </Button>
+          </Link>
 
           {/* Trust row */}
           <div className="flex items-center gap-3 mt-2">

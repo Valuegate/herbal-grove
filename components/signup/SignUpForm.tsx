@@ -2,6 +2,7 @@
 
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { GoogleIcon, FacebookIcon } from "../ui/icons";
+import Link from "next/link";
 
 type FormFields = {
   fullname: string;
@@ -128,12 +129,12 @@ export const SignUpForm = () => {
           </div>
         </div>
 
-        <div className="flex items-start gap-2 py-2">
+        <div className="flex items-center gap-2 py-2">
           <input
             type="checkbox"
             id="terms"
             required
-            className="mt-1 w-4 h-4 accent-[#1a7a1e]"
+            className="w-4 h-4 accent-[#1a7a1e]"
           />
           <label
             htmlFor="terms"
@@ -161,12 +162,12 @@ export const SignUpForm = () => {
 
         <p className="text-center text-xs text-gray-600 mt-4">
           Already have an account?{" "}
-          <a
-            href="/sign-in"
+          <Link
+            href="/login"
             className="text-[#1a7a1e] font-bold hover:underline"
           >
             Login
-          </a>
+          </Link>
         </p>
       </form>
     </div>

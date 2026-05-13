@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 /**
  * MidCTA — mid-page call-to-action banner encouraging first herb scan.
@@ -17,9 +18,11 @@ export default function MidCTA() {
             step by step.
           </p>
         </div>
-        <Button className="bg-brand-primary hover:bg-brand-700 text-white rounded-full px-8 py-3 text-base font-medium flex-shrink-0 h-12">
-          Get Started
-        </Button>
+        <Link href="/sign-up">
+          <Button className="bg-brand-primary hover:bg-brand-700 text-white rounded-full px-8 py-3 text-base font-medium flex-shrink-0 h-12">
+            Get Started
+          </Button>
+        </Link>
       </div>
     </section>
   );

@@ -114,7 +114,7 @@ export default function Navbar() {
         {/* Desktop auth */}
         <div className="hidden lg:flex items-center gap-4">
           <Link
-            href="/sign-in"
+            href="/login"
             className="font-medium text-body-text text-base hover:text-brand-primary transition-colors"
           >
             Log in

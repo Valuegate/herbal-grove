@@ -34,15 +34,15 @@ function LeafLogo() {
 
 export const BrandSection = () => {
   return (
-    <div className="p-8 flex flex-col items-center justify-center h-full text-center">
-      <div className="mb-8 flex items-center space-x-2">
+    <div className="p-7 lg:p-8 flex flex-col items-center justify-center h-full text-center">
+      <div className="mb-8 mt-5 flex items-center space-x-2">
         <LeafLogo />
         <span className="font-bold text-2xl text-[#1a7a1e]">HerbaGrove</span>
       </div>
 
       <div className="mb-8">
         <h2 className="text-3xl font-extrabold text-black mb-3">
-          Hello, Welcome!
+          Welcome Back!
         </h2>
         <p className="text-gray-600 max-w-[280px] mx-auto leading-relaxed italic">
           "Nature's wisdom, AI's Precision. Discover the power of botanical
@@ -50,7 +50,7 @@ export const BrandSection = () => {
         </p>
       </div>
 
-      <div className="mt-3 flex justify-center w-full max-w-[220px]">
+      <div className="mt-3 mb-3 flex justify-center w-full max-w-[220px]">
         <Image
           src={Morter}
           alt="Mortar and Pestle"
