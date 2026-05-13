@@ -16,7 +16,7 @@ import {
  */
 
 const navLinks = [
-  { label: "Home", href: "#" },
+  { label: "Home", href: "/" },
   { label: "What You Can Do", href: "#what-herbagrove-does" },
   { label: "Safety", href: "#how-it-works" },
 ];
@@ -24,10 +24,7 @@ const navLinks = [
 function LeafLogo() {
   return (
     <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-      <path
-        d="M16 4C21 6 25 10 25 15C25 20 21 24 16 24L16 4Z"
-        fill="#1a7a1e"
-      />
+      <path d="M16 4C21 6 25 10 25 15C25 20 21 24 16 24L16 4Z" fill="#1a7a1e" />
       <path
         d="M16 6C11 6 7 10 7 15C7 20 11 24 16 24L16 6Z"
         fill="#1a7a1e"
@@ -122,19 +119,19 @@ export default function Navbar() {
           >
             Log in
           </Link>
-          <Button className="bg-brand-primary hover:bg-brand-700 text-white rounded-full px-6 py-2 font-medium h-12">
-            Get Started
-          </Button>
+          {/* Link to the Signup Page */}
+          <Link href="/sign-up">
+            <Button className="bg-brand-primary hover:bg-brand-700 text-white rounded-full px-6 py-2 font-medium h-12">
+              Get Started
+            </Button>
+          </Link>
         </div>
 
         {/* Mobile hamburger */}
         <div className="lg:hidden">
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
-              <button
-                className="p-2 text-neutral-800"
-                aria-label="Open menu"
-              >
+              <button className="p-2 text-neutral-800" aria-label="Open menu">
                 <MenuIcon />
               </button>
             </SheetTrigger>
@@ -172,12 +169,12 @@ export default function Navbar() {
                   >
                     Log in
                   </Link>
-                  <Button
-                    className="bg-brand-primary hover:bg-brand-700 text-white rounded-full py-2 font-medium w-full h-12"
-                    onClick={() => setSheetOpen(false)}
-                  >
-                    Get Started
-                  </Button>
+                  {/* Link to the Signup Page for Mobile */}
+                  <Link href="/sign-up" onClick={() => setSheetOpen(false)}>
+                    <Button className="bg-brand-primary hover:bg-brand-700 text-white rounded-full py-2 font-medium w-full h-12">
+                      Get Started
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </SheetContent>

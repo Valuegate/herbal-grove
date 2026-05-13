@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["hr9nvs-3000.csb.app"],
+
   images: {
     remotePatterns: [
       {

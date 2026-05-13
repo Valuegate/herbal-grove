@@ -1,19 +1,26 @@
+"use client";
+
 import { BrandSection } from "@/components/signup/BrandSection";
 import { SignUpForm } from "@/components/signup/SignUpForm";
-import bgImage from "@/components/signup/bg-signup.png"
+import bgImage from "@/components/signup/bg-signup.png";
 
 export const SignUp = () => {
-  <main className="w-full h-full min-h-screen flex items-center justify-center p-6 sm:p-12 lg:p-40 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${bgImage})` }}>
-    <div className="relative flex flex-col lg:flex-row items-center justify-center w-full max-w-[850px] lg:min-h-[580px] mx-auto p-4 lg:p-0"></div>
-    
-    {/* Left column — brand section */}
-    <div className="relative lg:absolute lg:left-0 z-0 w-full lg:w-[450px] rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.12)] overflow-hidden lg:h-[550px] bg-white/80 mb-6 lg:mb-0 lg:pr-8">
-      <BrandSection />
-    </div>
+  return (
+    <main
+      className="w-full min-h-screen flex items-center justify-center p-4 md:p-8 lg:p-20 bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: `url(${bgImage.src})` }}
+    >
+      <div className="relative flex flex-col lg:flex-row items-center justify-center w-full max-w-[1000px] gap-8 lg:gap-0">
+        {/* Left column — Brand Section */}
+        <div className="relative lg:z-0 w-full lg:w-[480px] rounded-[2rem] shadow-xl overflow-hidden h-auto lg:h-[580px] bg-white/90 lg:-mr-12">
+          <BrandSection />
+        </div>
 
-    {/*Right column — sign up form */}
-    <div className="relative lg:absolute lg:right-0 z-10 w-full lg:w-[500px] rounded-[2rem] shadow-2xl overflow-hidden bg-[#FAFAFA] border border-gray-100 min-h-[580px]">
-      <SignUpForm />
-    </div>
-  </main>
-}
+        {/* Right column — Sign Up Form */}
+        <div className="relative lg:z-10 w-full lg:w-[520px] rounded-[2rem] shadow-2xl overflow-hidden bg-white border border-gray-100 p-8 lg:p-10">
+          <SignUpForm />
+        </div>
+      </div>
+    </main>
+  );
+};

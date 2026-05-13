@@ -32,8 +32,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    // Add suppressHydrationWarning to both html and body
+    <html lang="en" suppressHydrationWarning>
       <body
+        suppressHydrationWarning
         className={`${manrope.variable} ${inter.variable} ${geistMono.variable} antialiased`}
       >
         <ClerkProvider dynamic>
