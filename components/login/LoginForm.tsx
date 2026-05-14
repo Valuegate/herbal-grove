@@ -1,7 +1,8 @@
 "use-client";
 
+import { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { GoogleIcon, FacebookIcon } from "../ui/icons";
+import { GoogleIcon, FacebookIcon, EyeIcon, EyeSlashIcon } from "../ui/icons";
 import Link from "next/link";
 
 type FormFields = {
@@ -21,7 +22,12 @@ export const LoginForm = () => {
     console.log("Form Data:", data);
   };
 
+  //Common input Style
   const inputStyle = "w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-green focus:border-transparent outline-none transition-all text-black text-sm";
+
+  //Password display states
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   return (
     <div className="w-full">
@@ -31,16 +37,16 @@ export const LoginForm = () => {
       </p>
 
       {/* Social Buttons */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <button
           type="button"
-          className="flex items-center justify-center gap-2 bg-[#f5f5f5] hover:bg-gray-200 text-black py-2.5 rounded-lg text-xs font-semibold transition-colors border border-gray-200"
+          className="flex flex-wrap items-center justify-center gap-2 bg-[#f5f5f5] hover:bg-gray-200 text-black py-2.5 rounded-lg text-xs font-semibold transition-colors border border-gray-200 whitespace-normal text-center"
         >
           <GoogleIcon className="w-4 h-4" /> Sign in with Google
         </button>
         <button
           type="button"
-          className="flex items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white py-2.5 rounded-lg text-xs font-semibold transition-colors"
+          className="flex flex-wrap items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white py-2.5 rounded-lg text-xs font-semibold transition-colors whitespace-normal text-center"
         >
           <FacebookIcon className="w-4 h-4" /> Sign in with Facebook
         </button>
@@ -72,24 +78,37 @@ export const LoginForm = () => {
         </div>
 
         {/* Password */}
-        <div className="space-y-1">
+        <div className="space-y-1 py-4">
           <label className="text-xs font-bold text-gray-700">Password</label>
-          <input
-            {...register("password", {
-              required: "Password is required",
-              minLength: { value: 8, message: "Min 8 characters" },
-            })}
-            type="password"
-            placeholder="••••••••"
-            className={inputStyle}
-          />
+          <div className="relative">
+            <input
+              {...register("password", {
+                required: "Password is required",
+                minLength: { value: 8, message: "Min 8 characters" },
+              })}
+              type={showPassword ? "text" : "password"}
+              placeholder="••••••••"
+              className={inputStyle}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+            >
+              {showPassword ? (
+                <EyeIcon className="w-4 h-4" />
+              ) : (
+                <EyeSlashIcon className="w-4 h-4" />
+              )}
+            </button>
+          </div>
           {errors.password && (
             <p className="text-red-500 text-xs">{errors.password.message}</p>
           )}
         </div>
 
         {/*Password reset link*/}
-        <p className="text-xs text-gray-500 mt-2 text-right">
+        <p className="text-xs text-green-500 mt-2 text-right">
           <a href="#">Click to reset password?</a>
         </p>
 

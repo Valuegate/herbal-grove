@@ -1,7 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
-import { GoogleIcon, FacebookIcon } from "../ui/icons";
+import { GoogleIcon, FacebookIcon, EyeIcon, EyeSlashIcon } from "../ui/icons";
 import Link from "next/link";
 
 type FormFields = {
@@ -28,10 +29,14 @@ export const SignUpForm = () => {
   const inputStyle =
     "w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-green focus:border-transparent outline-none transition-all text-black text-sm";
 
+  // Password display states
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   return (
     <div className="w-full">
-      <h2 className="text-2xl font-bold text-[#1a7a1e] mb-2">Create Account</h2>
-      <p className="text-gray-500 text-sm mb-6">
+      <h2 className="font-heading text-2xl font-bold text-[#1a7a1e] mb-2">Create Account</h2>
+      <p className="text-gray-500 text-sm mb-6 font-body">
         Your journey to natural wellness starts here.
       </p>
 
@@ -60,7 +65,7 @@ export const SignUpForm = () => {
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         {/* Full Name */}
         <div className="space-y-1">
-          <label className="text-xs font-bold text-gray-700">Full Name</label>
+          <label className="text-xs font-bold text-gray-700 font-heading">Full Name</label>
           <input
             {...register("fullname", { required: "Full name is required" })}
             type="text"
@@ -93,15 +98,28 @@ export const SignUpForm = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1">
             <label className="text-xs font-bold text-gray-700">Password</label>
-            <input
-              {...register("password", {
-                required: "Password is required",
-                minLength: { value: 8, message: "Min 8 characters" },
-              })}
-              type="password"
-              placeholder="••••••••"
-              className={inputStyle}
-            />
+            <div className="relative">
+              <input
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: { value: 8, message: "Min 8 characters" },
+                })}
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                className={inputStyle}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+              >
+                {showPassword ? (
+                  <EyeIcon className="w-4 h-4" />
+                ) : (
+                  <EyeSlashIcon className="w-4 h-4" />
+                )}
+              </button>
+            </div>
             {errors.password && (
               <p className="text-red-500 text-xs">{errors.password.message}</p>
             )}
@@ -111,16 +129,29 @@ export const SignUpForm = () => {
             <label className="text-xs font-bold text-gray-700">
               Confirm Password
             </label>
-            <input
-              {...register("confirmPassword", {
-                required: "Please confirm password",
-                validate: (val) =>
-                  val === watch("password") || "Passwords don't match",
-              })}
-              type="password"
-              placeholder="••••••••"
-              className={inputStyle}
-            />
+            <div className="relative">
+              <input
+                {...register("confirmPassword", {
+                  required: "Please confirm password",
+                  validate: (val) =>
+                    val === watch("password") || "Passwords don't match",
+                })}
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="••••••••"
+                className={inputStyle}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+              >
+                {showConfirmPassword ? (
+                  <EyeIcon className="w-4 h-4" />
+                ) : (
+                  <EyeSlashIcon className="w-4 h-4" />
+                )}
+              </button>
+            </div>
             {errors.confirmPassword && (
               <p className="text-red-500 text-xs">
                 {errors.confirmPassword.message}
@@ -138,7 +169,7 @@ export const SignUpForm = () => {
           />
           <label
             htmlFor="terms"
-            className="text-[10px] text-gray-500 leading-tight"
+            className="text-sm text-gray-500 leading-tight"
           >
             I agree to the{" "}
             <span className="text-[#1a7a1e] underline cursor-pointer">

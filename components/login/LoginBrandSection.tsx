@@ -34,8 +34,8 @@ function LeafLogo() {
 
 export const BrandSection = () => {
   return (
-    <div className="p-7 lg:p-8 flex flex-col items-center justify-center h-full text-center">
-      <div className="mb-8 mt-5 flex items-center space-x-2">
+    <div className="p-8 flex flex-col items-center justify-center h-full text-center">
+      <div className="mb-8 flex items-center space-x-2">
         <LeafLogo />
         <span className="font-bold text-2xl text-[#1a7a1e]">HerbaGrove</span>
       </div>

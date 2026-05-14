@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Img from "@/components/marketing/img.png"
 import { Button } from "@/components/ui/button";
-import HerbScanCard from "@/components/marketing/HerbScanCard";
 import Link from "next/link";
 
 /**
@@ -35,7 +34,7 @@ export default function Hero() {
         className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
       />
 
-      <div className="relative z-10 section-padding pt-32 pb-16 lg:pt-[220px] lg:pb-24 flex flex-col lg:flex-row items-center gap-10 lg:gap-14">
+      <div className="relative z-10 section-padding pt-32 pb-16 lg:pt-[110px] lg:pb-24 flex flex-col lg:flex-row items-center gap-10 lg:gap-14">
         {/* Left column — text */}
         <div className="flex-1 flex flex-col gap-6 lg:gap-8">
           <h1 className="font-heading font-medium text-3xl md:text-[40px] lg:text-[64px] leading-tight md:leading-[60px] lg:leading-[80px] text-foreground">
