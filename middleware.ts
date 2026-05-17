@@ -1,3 +1,4 @@
+/*
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 const isProtectedRoute = createRouteMatcher([
@@ -16,3 +17,12 @@ export const config = {
     "/(api|trpc)(.*)",
   ],
 };
+*/
+
+// Clerk middleware is commented out while backend auth is not implemented.
+// Export a harmless no-op middleware so Next.js does not error about missing exports.
+import { NextResponse } from "next/server";
+
+export default function middleware() {
+  return NextResponse.next();
+}
