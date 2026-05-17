@@ -3,7 +3,7 @@ import Morter from "@/components/signup/morter.png";
 
 function LeafLogo() {
   return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+    <svg width="32" height="32" viewBox="0 3 32 32" fill="none">
       <path d="M16 4C21 6 25 10 25 15C25 20 21 24 16 24L16 4Z" fill="#1a7a1e" />
       <path
         d="M16 6C11 6 7 10 7 15C7 20 11 24 16 24L16 6Z"
