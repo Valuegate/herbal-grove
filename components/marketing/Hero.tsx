@@ -34,9 +34,9 @@ export default function Hero() {
         className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
       />
 
-      <div className="relative z-10 section-padding pt-32 pb-16 lg:pt-[110px] lg:pb-24 flex flex-col lg:flex-row items-center gap-10 lg:gap-14">
+      <div className="relative z-10 section-padding pt-32 pb-16 md:pt-[110px] md:pb-24 flex flex-col md:flex-row items-center gap-10 md:gap-14">
         {/* Left column — text */}
-        <div className="flex-1 flex flex-col gap-6 lg:gap-8">
+        <div className="flex-1 flex flex-col gap-6 md:gap-8">
           <h1 className="font-heading font-medium text-3xl md:text-[40px] lg:text-[64px] leading-tight md:leading-[60px] lg:leading-[80px] text-foreground">
             Understand herbs with{" "}
             <span className="font-bold text-brand-700">AI and Experts</span>
@@ -50,15 +50,15 @@ export default function Hero() {
           <Link href="/sign-up">
             <Button
               size="lg"
-              className="rounded-full bg-brand-primary hover:bg-brand-700 text-white font-bold text-xl px-12 py-6 h-auto shadow-[0px_0px_12px_0px_rgba(0,0,0,0.25)] w-fit"
+              className="rounded-full bg-brand-primary hover:bg-brand-700 text-white font-bold text-xl px-12 py-6 h-auto shadow-[0px_0px_12px_0px_rgba(0,0,0,0.25)] w-fit cursor-pointer"
             >
               Get Started
             </Button>
           </Link>
 
           {/* Trust row */}
-          <div className="flex items-center gap-3 mt-2">
-            <div className="flex items-center">
+          <div className="flex flex-wrap items-center gap-3 mt-2">
+            <div className="flex items-center flex-shrink-0">
               {avatars.map((avatar, i) => (
                 <Image
                   key={avatar.src}
@@ -79,7 +79,7 @@ export default function Hero() {
         </div>
 
         {/* Right column — HerbScanCard */}
-        <div className="w-full max-w-[420px] lg:w-[480px] lg:max-w-none flex-shrink-0">
+        <div className="w-full max-w-[420px] md:max-w-[50%] lg:w-[480px] lg:max-w-none flex-shrink-0">
           <Image src={Img} alt="Image" />
         </div>
       </div>

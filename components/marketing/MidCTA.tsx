@@ -19,7 +19,7 @@ export default function MidCTA() {
           </p>
         </div>
         <Link href="/sign-up">
-          <Button className="bg-brand-primary hover:bg-brand-700 text-white rounded-full px-8 py-3 text-base font-medium flex-shrink-0 h-12">
+          <Button className="bg-brand-primary hover:bg-brand-700 text-white rounded-full px-8 py-3 text-base font-medium shrink-0 h-12 cursor-pointer">
             Get Started
           </Button>
         </Link>

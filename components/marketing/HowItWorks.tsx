@@ -63,7 +63,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section id="how-it-works" className="bg-white section-padding py-24">
+    <section id="how-it-works" className="bg-white section-padding pb-12">
       <div className="content-width flex flex-col lg:flex-row gap-12 lg:gap-8 items-center">
         {/* Left — headline */}
         <div className="flex-1 lg:max-w-[544px] flex flex-col gap-6">

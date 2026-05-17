@@ -121,7 +121,7 @@ export default function Navbar() {
           </Link>
           {/* Link to the Signup Page */}
           <Link href="/sign-up">
-            <Button className="bg-brand-primary hover:bg-brand-700 text-white rounded-full px-6 py-2 font-medium h-12">
+            <Button className="bg-brand-primary hover:bg-brand-700 text-white rounded-full px-6 py-2 font-medium h-12 cursor-pointer">
               Get Started
             </Button>
           </Link>
