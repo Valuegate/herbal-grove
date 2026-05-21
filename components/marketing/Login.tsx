@@ -22,7 +22,7 @@ export const Login = () => {
         </button>
       </Link>
 
-      <div className="relative flex flex-col lg:flex-row items-center justify-center w-full max-w-[1000px] gap-8 lg:gap-0">
+      <div className="relative flex flex-col lg:flex-row items-center justify-center w-full max-w-[1000px] gap-8 lg:gap-0 ">
         {/* Left column — Brand Section */}
         <div className="relative lg:z-0 w-full lg:w-[480px] rounded-[2rem] shadow-xl overflow-hidden h-auto lg:h-[55  0px] bg-white/90 lg:-mr-12">
           <BrandSection />

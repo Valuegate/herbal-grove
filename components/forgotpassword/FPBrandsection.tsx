@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Padlock from "@/components/signup/morter.png";
+import Padlock from "@/components/forgotpassword/forgotpassword.png";
 
 function LeafLogo() {
   return (
@@ -32,29 +32,28 @@ function LeafLogo() {
   );
 }
 
-export const BrandSection = () => {
+export const ForgotPasswordBrandSection = () => {
   return (
-    <div className="p-5 flex flex-col items-center justify-center h-full text-center">
+    <div className="p-5 flex flex-col items-center justify-center  text-center">
       <div className="mb-8 flex items-center space-x-2">
         <LeafLogo />
         <span className="font-bold text-2xl text-[#1a7a1e]">HerbaGrove</span>
       </div>
 
-      <div className="mb-2">
+      <div className="mb-8">
         <h2 className="text-3xl font-extrabold text-black mb-3">
-          Welcome Back!
+          Forgot Password?
         </h2>
         <p className="text-gray-600 max-w-[280px] mx-auto leading-relaxed">
-          "Nature's wisdom, AI's Precision. Discover the power of botanical
-          healing personalized for your unique needs."
+          "No worries! Enter your email and we'll send you reset instructions to get back to your herbal journey"
         </p>
       </div>
 
-      <div className=" mb-3 flex justify-center w-full max-w-[220px]">
+      <div className="mt-3 mb-3 flex justify-center w-full max-w-[220px]">
         <Image
           src={Padlock}
           alt="Locked Heart"
-          className="w-full h-auto object-contain drop-shadow-2xl"
+          
         />
       </div>
     </div>

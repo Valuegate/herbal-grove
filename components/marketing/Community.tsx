@@ -35,7 +35,7 @@ const quotes = [
   },
   {
     text: "\u201CAs a practitioner, I recommend HerbaGrove to my clients so they can do their own research safely. The quality of the information is genuinely impressive.\u201D",
-    author: "\u2014 Dr. Aisha Okonkwo",
+    author: "\u2014 Dr. Nathan Smith",
     role: "Naturopath",
     avatar: "https://i.pravatar.cc/80?img=12",
   },

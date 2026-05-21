@@ -34,7 +34,7 @@ export default function Hero() {
         className="absolute inset-0 w-full h-full object-cover pointer-events-none z-0"
       />
 
-      <div className="relative z-10 section-padding pt-32 pb-16 md:pt-[110px] md:pb-24 flex flex-col md:flex-row items-center gap-10 md:gap-14">
+      <div className="relative z-10 section-padding pt-32 pb-16 md:pt-[150px] md:pb-24 flex flex-col md:flex-row items-center gap-10 md:gap-14">
         {/* Left column — text */}
         <div className="flex-1 flex flex-col gap-6 md:gap-8">
           <h1 className="font-heading font-medium text-3xl md:text-[40px] lg:text-[64px] leading-tight md:leading-[60px] lg:leading-[80px] text-foreground">
