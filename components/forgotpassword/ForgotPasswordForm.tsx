@@ -58,7 +58,7 @@ export const ForgotPasswordForm = () => {
         </button>
 
         <div className="mt-4 text-center">
-          <Link href="/login" className="text-sm text-gray-600 hover:underline">
+          <Link href="/login" className="text-sm text-[#1a7a1e] hover:underline">
             Return to Login
           </Link>
         </div>

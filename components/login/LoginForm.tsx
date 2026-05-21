@@ -108,7 +108,7 @@ export const LoginForm = () => {
         </div>
 
         {/*Password reset link*/}
-          <p className="text-xs text-green-500 mt-2 text-right">
+          <p className="text-xs text-[#1a7a1e] mt-2 text-right">
             <Link href="/forgotpassword">
               Click to reset password?
             </Link>
