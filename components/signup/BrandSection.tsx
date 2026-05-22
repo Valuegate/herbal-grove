@@ -44,7 +44,11 @@ export const BrandSection = () => {
         <h2 className="text-3xl font-extrabold text-black mb-3">
           Hello, Welcome!
         </h2>
+<<<<<<< HEAD
         <p className="text-gray-600 max-w-[280px] mx-auto leading-relaxed">
+=======
+        <p className="text-gray-600 max-w-[280px] mx-auto leading-relaxed italic">
+>>>>>>> 8ebdb00697fe3b15c10ede1990286a97040dcccd
           "Nature's wisdom, AI's Precision. Discover the power of botanical
           healing personalized for your unique needs."
         </p>

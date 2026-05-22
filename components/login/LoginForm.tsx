@@ -108,11 +108,17 @@ export const LoginForm = () => {
         </div>
 
         {/*Password reset link*/}
+<<<<<<< HEAD
           <p className="text-xs text-[#1a7a1e] mt-2 text-right">
             <Link href="/forgotpassword">
               Click to reset password?
             </Link>
           </p>
+=======
+        <p className="text-xs text-green-500 mt-2 text-right">
+          <a href="#">Click to reset password?</a>
+        </p>
+>>>>>>> 8ebdb00697fe3b15c10ede1990286a97040dcccd
 
         <div className="flex items-center gap-2 py-4">
           <input
