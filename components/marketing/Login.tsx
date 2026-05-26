@@ -11,24 +11,19 @@ export const Login = () => {
       style={{ backgroundImage: `url(${bgImage.src})` }}
     >
       {/*Back to Home Button */}
-      <Link
-        href="/">
-        <button 
-          type="button"
-          className="fixed top-4 left-4 md:absolute md:top-6 md:left-6 sm:top-8 sm:left-8 bg-white text-brand-primary hover:bg-brand-primary hover:text-white px-6 py-2 rounded-full transition-all duration-300 shadow-lg z-50 text-sm font-bold tracking-wide"
-        >
+      <Link href="/"
+          className="fixed top-4 left-4 md:absolute md:top-6 md:left-6 sm:top-8 sm:left-8 bg-white text-brand-primary hover:bg-brand-primary hover:text-white px-6 py-2 rounded-full transition-all duration-300 shadow-lg z-50 text-sm font-bold tracking-wide">
           Back to Home
-        </button>
       </Link>
 
-  <div className="relative flex flex-col lg:flex-row items-center justify-center w-full max-w-[1000px] gap-8 lg:gap-0">
+  <div className="relative flex flex-col lg:flex-row items-center justify-center w-full max-w-250 gap-8 lg:gap-0">
         {/* Left column — Brand Section */}
-        <div className="relative lg:z-0 w-full lg:w-[480px] rounded-[2rem] shadow-xl overflow-hidden h-auto lg:h-[550px] bg-white/90 lg:-mr-12">
+        <div className="relative lg:z-0 w-full lg:w-120 rounded-[2rem] shadow-xl overflow-hidden h-auto lg:h-137.5 bg-white/90 lg:-mr-12">
           <BrandSection />
         </div>
 
         {/* Right column — Sign Up Form */}
-        <div className="relative lg:z-10 w-full lg:w-[520px] rounded-[2rem] shadow-2xl overflow-hidden bg-white/95 border border-gray-100 backdrop-blur-sm p-10 lg:p-12 lg:min-h-[600px]">
+        <div className="relative lg:z-10 w-full lg:w-130 rounded-[2rem] shadow-2xl overflow-hidden bg-white/95 border border-gray-100 backdrop-blur-sm p-10 lg:p-12 lg:min-h-150">
           <LoginForm />
         </div>
       </div>

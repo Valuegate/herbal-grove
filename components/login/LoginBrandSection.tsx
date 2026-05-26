@@ -45,8 +45,8 @@ export const BrandSection = () => {
           Welcome Back!
         </h2>
         <p className="text-gray-600 max-w-[280px] mx-auto leading-relaxed">
-          "Nature's wisdom, AI's Precision. Discover the power of botanical
-          healing personalized for your unique needs."
+          &ldquo;Nature&apos;s wisdom, AI&apos;s Precision. Discover the power of botanical
++          healing personalized for your unique needs.&rdquo;
         </p>
       </div>
 

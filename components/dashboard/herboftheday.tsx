@@ -63,24 +63,20 @@ export default function HerbOfTheDay({ darkMode, herbIndex = 0 }: HerbCardProps)
 
           {/*Actions*/}
           <div className="flex flex-wrap items-center gap-4 pt-2">
-            <Link href="#">
-              <button className={`flex items-center text-sm font-bold group transition duration-150 hover:underline ${darkMode ? 'text-[#c9ffc9]' : 'text-[#001900]'}`}>
+            <Link href="#" className={`flex items-center text-sm font-bold group transition duration-150 hover:underline ${darkMode ? 'text-[#c9ffc9]' : 'text-[#001900]'}`}>
                 <span>Read Research</span>
                 <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
-              </button>
             </Link>
 
-            <Link href="#">
-              <button className={`flex items-center text-sm font-bold px-4 py-2 rounded-full border transition duration-150 ${
+            <Link href="#" className={`flex items-center text-sm font-bold px-4 py-2 rounded-full border transition duration-150 ${
                 darkMode 
                   ? 'border-neutral-700 hover:bg-neutral-800 text-neutral-300' 
                   : 'border-gray-200 hover:bg-gray-50 text-gray-600'
               }`}>
                 <BookmarkIcon />
                 <span>Save</span>
-              </button>
             </Link>
           </div>
         </div>

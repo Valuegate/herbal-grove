@@ -1,5 +1,7 @@
 import Link from "next/link";
+import Image from "next/image";
 import bgImage from "@/components/signup/bg-signup.png";
+import SuccessImage from "@/components/signup/ss.png"
 
 type Props = {
   onContinue?: () => void;
@@ -12,11 +14,11 @@ export const SignupSuccess = ({ onContinue, message ="Your account has been crea
       style={{ backgroundImage: `url(${bgImage.src})` }}
     >
       <div className="w-full max-w-md bg-white/30 backdrop-blur-md rounded-2xl p-10 shadow-lg text-center">
-        <div className="mx-auto w-24 h-24 rounded-full bg-emerald-700 flex items-center justify-center shadow-lg">
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/3/3b/Eo_circle_green_checkmark.svg"
+        <div className="mx-auto w-24 h-24 rounded-full bg-white  flex items-center justify-center ">
+          <Image
+            src={SuccessImage}
             alt="Success"
-            className="w-12 h-12"
+            className="w-24 h-24"
           />
         </div>
 
@@ -24,13 +26,11 @@ export const SignupSuccess = ({ onContinue, message ="Your account has been crea
           {message}
         </h2>
 
-        <Link href="/dashboard">
-          <button
+        <Link href="/dashboard"
             onClick={onContinue}
             className="mt-8 inline-block bg-emerald-700 text-white py-2 px-8 rounded-full shadow hover:bg-emerald-800 transition"
           >
             Go to dashboard
-          </button>
         </Link>
       </div>
     </main>
