@@ -36,14 +36,14 @@ export default function HerbOfTheDay({ darkMode, herbIndex = 0 }: HerbCardProps)
   return (
     <section className="relative">
       <div className={`
-        rounded-3xl p-6 md:p-7 pt-20 md:pt-20 flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-between border relative overflow-hidden transition-all duration-300 
+        rounded-3xl p-6 md:p-7 pt-20 md:pt-20 flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-between relative overflow-hidden transition-all duration-300 
         ${darkMode
-        ? 'bg-[#1e1e1e] border-neutral-800 shadow-[0_8px_30px_rgba(0,0,0,0.4)] '
+        ? 'bg-[#222224]'
           : 'bg-white border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.4)] shadow-black-500/10'
         }
       `}>
         {/*Herb Details*/}
-        <div className="absolute top-2 left-0 right-0  flex justify-center z-20">
+        <div className="absolute top-6 inset-x-6 flex justify-center z-20">
           <div className="inline-flex items-center gap-2 px-4 py-3 rounded-full text-base font-bold text-[#001900] bg-[#c9ffc9] dark:bg-[#c9ffc9] dark:text-[#001900]">
             <FlowerIcon />
             <span>Herb of the Day</span>

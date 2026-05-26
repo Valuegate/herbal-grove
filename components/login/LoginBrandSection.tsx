@@ -44,13 +44,13 @@ export const BrandSection = () => {
         <h2 className="text-3xl font-extrabold text-black mb-3">
           Welcome Back!
         </h2>
-        <p className="text-gray-600 max-w-[280px] mx-auto leading-relaxed">
+        <p className="text-gray-600 max-w-70 mx-auto leading-relaxed">
           &ldquo;Nature&apos;s wisdom, AI&apos;s Precision. Discover the power of botanical
 +          healing personalized for your unique needs.&rdquo;
         </p>
       </div>
 
-      <div className="mt-3 mb-3 flex justify-center w-full max-w-[220px]">
+      <div className="mt-3 mb-3 flex justify-center w-full max-w-55">
         <Image
           src={Morter}
           alt="Mortar and Pestle"
