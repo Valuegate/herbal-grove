@@ -1,4 +1,4 @@
-"use-client";
+"use client";
 
 import { useForm, type SubmitHandler } from "react-hook-form";
 import Link from "next/link";
@@ -17,7 +17,6 @@ export const ForgotPasswordForm = () => {
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log("Form Data:", data);
   };
 
   //Common input Style

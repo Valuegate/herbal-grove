@@ -1,4 +1,4 @@
-"use-client";
+"use client";
 
 import { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
@@ -27,7 +27,6 @@ export const LoginForm = () => {
 
   //Password display states
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   return (
     <div className="w-full">
@@ -118,7 +117,6 @@ export const LoginForm = () => {
           <input
             type="checkbox"
             id="remember"
-            required
             className="w-4 h-4 accent-[#1a7a1e]"
           />
           <label htmlFor="remember" className="text-[10px] text-gray-500 leading-tight">Remember Me</label>
