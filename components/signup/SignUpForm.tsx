@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { GoogleIcon, FacebookIcon, EyeIcon, EyeSlashIcon } from "../ui/icons";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type FormFields = {
   fullname: string;
@@ -16,13 +17,16 @@ export const SignUpForm = () => {
   const {
     register,
     handleSubmit,
-    watch, // Fixed: watch comes from useForm, NOT from 'fs'
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<FormFields>();
+
+  const router = useRouter();
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     console.log("Form Data:", data);
+    router.push("/signupsuccess");
   };
 
   // Common input style
@@ -134,7 +138,7 @@ export const SignUpForm = () => {
                 {...register("confirmPassword", {
                   required: "Please confirm password",
                   validate: (val) =>
-                    val === watch("password") || "Passwords don't match",
+                    val === getValues("password") || "Passwords do not match"
                 })}
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="••••••••"
