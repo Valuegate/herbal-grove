@@ -75,7 +75,7 @@ export default function Sidebar({ isOpen, onClose, darkMode }: SidebarProps) {
             <span>Chat Consultant</span>
           </Link>
 
-          <Link href="library"
+          <Link href="/researchlibrary"
             className={`flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 group ${
               darkMode 
                 ? ' text-emerald-400 ' 

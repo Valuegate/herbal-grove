@@ -34,6 +34,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pageTitle = pathname?.includes("/history") ? "Activity History"
     : pathname?.includes("/chat") ? "Chatbox"
     : pathname?.includes("/consultant") ? "Chat Consultant"
+    : pathname?.includes("/researchlibrary") ? "Research Library"
     : "Dashboard";
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);

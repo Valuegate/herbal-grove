@@ -1,0 +1,98 @@
+"use client"
+
+import Image from "next/image";
+import Image1 from "@/components/researchlibrary/mint.jpg";
+import Image2 from "@/components/researchlibrary/ginseng.jpg"
+import { useDashboardContext } from "@/components/dashboard/DashboardContext";
+
+const articles = [
+  {
+    id: 0,
+    photo: Image1,
+    tags: ["Adaptogen", "Anxiety"],
+    readTime: "8 min read",
+    title: "The Efficacy of Mentha Piperita in Managing IBS Symptoms",
+    description:
+      "Summarizing double-blind placebo-controlled trials regarding enteric-coated peppermint oil and gastrointestinal health.",
+  },
+  {
+    id: 1,
+    photo: Image2,
+    tags: ["Digestive", "Inflammation"],
+    readTime: "15 min read",
+    title: "Echinacea Purpurea: A Clinical Review on Immune Modulation",
+    description:
+      "An in-depth look at the chemical compounds and therapeutic mechanisms of Echinacea in preventing respiratory infections...",
+  },
+];
+
+export default function FeaturedResearch () {
+  const { darkMode } = useDashboardContext();
+
+  return (
+    <div>
+      <section className="space-y-6 py-6">
+        <div className="flex items-center justify-between">
+        <h2 className={`text-2xl font-medium ${darkMode ? "text-white" : 'text-black'}`}>
+          Featured Research
+        </h2>
+
+        <button type="button" className={`text-sm font-bold cursor-pointer ${darkMode ? "text-white" : 'text-black'}`}>
+          View All Papers
+        </button>
+      </div>
+      </section>
+
+      <div className="grid gap-5 md:grid-cols-2">
+        {articles.map((article) => (
+          <div key={article.id} className={`overflow-hidden rounded-xl border ${darkMode ? "border-gray-700 bg-[#222224]" : 'border-gray-200 bg-white shadow-sm'}`}>
+            {/*Study Head*/}
+            <div className="relative h-36 overflow-hidden sm:h-44">
+              <Image
+                src={article.photo}
+                alt={article.title}
+                className="h-full w-full object-cover"
+              />
+
+              <span className="absolute left-4 top-4 rounded-full bg-black px-3 py-1.5 text-[10px] font-bold uppercase text-white">
+                Recent Study
+              </span>
+            </div>
+
+            {/*Study Body*/}
+            <div className="space-y-4 p-5">
+              <div className="flex flex-wrap gap-2">
+                {article.tags.map((tag) => (
+                  <span key={tag} className={`rounded px-2.5 py-1 text-[10px] font-bold uppercase ${darkMode ? "bg-[#222224] text-white" : 'bg-slate-500 text-gray-700'}`}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              
+              <div>
+                <h3 className={`text-xl font-extrabold leading-tight ${darkMode ? "text-white" : 'text-[#222224]'}`}>
+                  {article.title}
+                </h3>
+
+                <p className={`mt-2 text-sm ${darkMode ? "text-white" : 'text-[#222224]'}`}>
+                  {article.description}
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <span className={`text-sm font-bold ${darkMode ? "text-white" : 'text-[#222224]'}`}>
+                  {article.readTime}
+                </span>
+
+                <button type="button" className={`text-sm  font-bold cursor-pointer ${darkMode ? "text-white" : 'text-[#222224]'}`}>
+                  Read Analysis
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+  )
+}
