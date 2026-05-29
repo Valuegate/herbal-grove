@@ -30,7 +30,7 @@ export const SignupSuccess = ({ onContinue, message ="Your account has been crea
 
         <Link href="/dashboard"
             onClick={onContinue}
-            className="mt-8 inline-block bg-emerald-700 text-white py-2 px-8 rounded-full shadow hover:bg-emerald-800 transition"
+            className="mt-8 inline-block bg-emerald-700 text-white py-2 px-8 rounded-full shadow hover:bg-emerald-800"
           >
             Go to dashboard
         </Link>
