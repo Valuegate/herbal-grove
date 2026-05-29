@@ -5,6 +5,7 @@ import Link from "next/link"
 import { BookmarkIcon } from "@/components/ui/icons"
 import { FlowerIcon } from "@/components/ui/icons"
 import FlowerImage from "@/components/dashboard/morter.png"
+import { MessageCircle } from "lucide-react"
 
 export const herbs = [
   {
@@ -109,6 +110,16 @@ export default function HerbOfTheDay({ darkMode, herbIndex = 0 }: HerbCardProps)
               )}
               </div>
           </div>
+        </div>
+        <div className="fixed bottom-6 right-6 z-40 flex flex-col items-center gap-1 group">
+          <Link href="/chat" 
+            className="w-14 h-14 rounded-full bg-emerald-700/20 hover:bg-emerald-400 text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200"
+            aria-label="Chat with AI"
+            >
+              <MessageCircle />
+          </Link>
+
+          <span className={`text-[10px] font-bold tracking-wider uppercase select-none opacity-90 transition-opacity ${darkMode ? 'text-emerald-400' : 'text-[#2b7a2d]'}`}>Chat with AI</span>
         </div>
       </div>
     </section>

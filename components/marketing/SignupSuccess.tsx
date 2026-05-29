@@ -10,19 +10,21 @@ type Props = {
 export const SignupSuccess = ({ onContinue, message ="Your account has been created successfully"}: Props) => {
   return (
     <main
-      className="w-full min-h-screen flex items-center justify-center pt-20 p-4 md:p-8 lg:p-20 bg-cover bg-center bg-no-repeat relative"
+      className="w-full min-h-screen flex items-center justify-center p-4 bg-cover bg-center bg-no-repeat relative"
       style={{ backgroundImage: `url(${bgImage.src})` }}
     >
-      <div className="w-full max-w-md bg-white/30 backdrop-blur-md rounded-2xl p-10 shadow-lg text-center">
-        <div className="mx-auto w-24 h-24 rounded-full bg-white  flex items-center justify-center ">
+      <div className="w-full max-w-md min-h-125 bg-white/30 backdrop-blur-md rounded-2xl p-10 shadow-lg text-center">
+        <div className="mx-auto w-24 h-24 rounded-full bg-white flex items-center justify-center ">
           <Image
             src={SuccessImage}
             alt="Success"
-            className="w-24 h-24"
+            className="object-contain"
+            width={300}
+            height={100}
           />
         </div>
 
-        <h2 className="mt-6 text-lg text-slate-800" role="status" aria-live="polite">
+        <h2 className="mt-6 text-lg font-bold text-gray-900" role="status" aria-live="polite">
           {message}
         </h2>
 

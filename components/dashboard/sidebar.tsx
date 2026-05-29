@@ -14,9 +14,7 @@ interface SidebarProps {
   darkMode: boolean;
 }
 
-export default function Sidebar({
-  isOpen, onClose, darkMode
-}: SidebarProps) {
+export default function Sidebar({ isOpen, onClose, darkMode }: SidebarProps) {
   return (
     <>
       {/* Mobile Sidebar */}
@@ -63,7 +61,7 @@ export default function Sidebar({
             <span>Dashboard</span>
           </Link>
 
-          <Link href="#"
+          <Link href="/consultant"
             className={`flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 group ${
               darkMode 
                 ? ' text-emerald-400' 
@@ -77,7 +75,7 @@ export default function Sidebar({
             <span>Chat Consultant</span>
           </Link>
 
-          <Link href="#"
+          <Link href="library"
             className={`flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 group ${
               darkMode 
                 ? ' text-emerald-400 ' 
