@@ -28,6 +28,42 @@ const articles = [
     description:
       "An in-depth look at the chemical compounds and therapeutic mechanisms of Echinacea in preventing respiratory infections...",
   },
+  {
+    id: 2,
+    photo: Image1,
+    tags: ["Anti-inflammatory", "Joint Health"],
+    readTime: "12 min read",
+    title: "Curcuma Longa Extract for Arthritis Relief",
+    description:
+      "Clinical evidence on turmeric's curcuminoids and their effect on pain, swelling, and mobility in osteoarthritis patients.",
+  },
+  {
+    id: 3,
+    photo: Image2,
+    tags: ["Adaptogen", "Stress"],
+    readTime: "10 min read",
+    title: "Withania Somnifera: Stress Resilience and Cognitive Support",
+    description:
+      "A review of Ashwagandha supplementation studies measuring cortisol, anxiety, and memory performance in adults.",
+  },
+  {
+    id: 4,
+    photo: Image1,
+    tags: ["Sleep", "Relaxation"],
+    readTime: "9 min read",
+    title: "Matricaria Chamomilla and Its Role in Sleep Quality",
+    description:
+      "Analyzing randomized trials on chamomile tea intake and its impact on insomnia symptoms and sleep architecture.",
+  },
+  {
+    id: 5,
+    photo: Image2,
+    tags: ["Digestive", "Metabolism"],
+    readTime: "14 min read",
+    title: "Zingiber Officinale for Nausea and Gut Motility",
+    description:
+      "Examining ginger's efficacy in nausea relief, gastric emptying, and inflammatory markers in digestive disorders.",
+  },
 ];
 
 export default function FeaturedResearch ({ searchQuery }: ResearchArticlesProps) {
