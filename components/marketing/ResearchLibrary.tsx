@@ -1,7 +1,7 @@
 "use client"
 
-import Image from "next/image";
 import { Search } from "lucide-react";
+import { useState } from "react";
 import { useDashboardContext } from "@/components/dashboard/DashboardContext";
 import FeaturedResearch from "@/components/researchlibrary/featuredResearch";
 import LatestPublication from "@/components/researchlibrary/publications";
@@ -9,6 +9,7 @@ import LatestPublication from "@/components/researchlibrary/publications";
 
 export default function ResearchLibrary() {
   const { darkMode } = useDashboardContext();
+  const [searchQuery, setSearchQuery] = useState("");
   return (
     <div className="px-4 py-6">
       {/*Hero Section*/}
@@ -21,15 +22,23 @@ export default function ResearchLibrary() {
           <div className={`flex h-12 items-center rounded-xl border px-4 py-1.5 shadow-sm transition-colors ${darkMode ? "bg-[#222224] border-neutral-700" : "bg-white border-slate-200"}`}>
             <Search className="w-5 h-5 text-gray-500" />
             
-            <input 
-              type="text"
-              placeholder='Search Herbs, Ailments or Research Papers...'
-              className={`min-w-0 flex-1 bg-transparent text-sm outline-none ${darkMode ? 'text-white placeholder-neutral-500' : 'text-neutral-700 placeholder-gray-400'}`}
-            />
+              <div className="flex w-full items-center ">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder='Search Herbs, Ailments or Research Papers...'
+                  className={`pl-3 min-w-0 flex-1 bg-transparent text-sm outline-none ${darkMode ? 'text-white placeholder-neutral-500' : 'text-neutral-700 placeholder-gray-400'}`}
+                />
 
-            <button type="button" className={`ml-2 shrink-0 rounded-lg bg-green-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800 sm:px-6`}>
-              Search
-            </button>
+                <button
+                  type="button"
+                  onClick={() => { /* visual-only, search is live */ }}
+                  className={`ml-2 shrink-0 rounded-lg bg-green-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800 sm:px-6`}
+                >
+                  Search
+                </button>
+              </div>
           </div>
         </div>
       </div>
@@ -37,7 +46,7 @@ export default function ResearchLibrary() {
 
       {/*Featured Research*/}
       <div className="py-6">
-        <FeaturedResearch />
+        <FeaturedResearch searchQuery={searchQuery} />
       </div>
 
       {/*Latest Publication*/}

@@ -28,11 +28,11 @@ export const SignupSuccess = ({ onContinue, message ="Your account has been crea
           {message}
         </h2>
 
-        <Link href="/dashboard"
+        <Link href="/login"
             onClick={onContinue}
             className="mt-8 inline-block bg-emerald-700 text-white py-2 px-8 rounded-full shadow hover:bg-emerald-800"
           >
-            Go to dashboard
+            Login Now
         </Link>
       </div>
     </main>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { GoogleIcon, FacebookIcon, EyeIcon, EyeSlashIcon } from "../ui/icons";
 import Link from "next/link";
@@ -11,6 +12,7 @@ type FormFields = {
 }
 
 export const LoginForm = () => {
+  const router = useRouter();
   const {
     register,
     handleSubmit,
@@ -20,6 +22,8 @@ export const LoginForm = () => {
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
     console.log("Form Data:", data);
+    // Redirect to dashboard after successful login
+    router.push('/dashboard');
   };
 
   //Common input Style

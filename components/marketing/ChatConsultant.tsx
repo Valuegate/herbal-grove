@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useDashboardContext } from "@/components/dashboard/DashboardContext";
@@ -179,12 +178,12 @@ export default function ChatConsultant() {
                   </p>
                 </div>
               </div>
-              <button
+              <Link href="/consultantchat"
                 className="w-full sm:w-auto rounded-full bg-green-700 px-5 py-3 text-sm font-medium text-white transition hover:bg-green-800 cursor-pointer"
                 type="button"
               >
                 Start Consult
-              </button>
+              </Link>
 
             </div>
           ))}

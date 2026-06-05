@@ -5,6 +5,10 @@ import Image1 from "@/components/researchlibrary/mint.jpg";
 import Image2 from "@/components/researchlibrary/ginseng.jpg"
 import { useDashboardContext } from "@/components/dashboard/DashboardContext";
 
+interface ResearchArticlesProps {
+  searchQuery: string
+}
+
 const articles = [
   {
     id: 0,
@@ -26,8 +30,33 @@ const articles = [
   },
 ];
 
-export default function FeaturedResearch () {
+export default function FeaturedResearch ({ searchQuery }: ResearchArticlesProps) {
   const { darkMode } = useDashboardContext();
+
+  //Search Functionality
+  const researchFilter = articles.filter(research => 
+    research.title.toLocaleLowerCase().includes(searchQuery.toLocaleLowerCase())
+  );
+
+  if (researchFilter.length === 0) {
+    return (
+      <div className={`
+        flex flex-col items-center justify-center text-center py-12 px-6
+        ${darkMode ? 'bg-[#222224] border-neutral-800/80'
+          : 'bg-white border-gray-200/80'
+        }  
+      `}>
+        <div className="space-y-1 max-w-xs">
+          <h3 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-[#222224]'}`}>
+            No Saved Posts Found
+          </h3>
+          <p className={`text-sm ${darkMode ? 'text-white' : 'text-[#222224]'}`}>
+            We could not find any saved posts matching "{searchQuery}". Try something else.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>
@@ -44,7 +73,7 @@ export default function FeaturedResearch () {
       </section>
 
       <div className="grid gap-5 md:grid-cols-2">
-        {articles.map((article) => (
+        {researchFilter.map((article) => (
           <div key={article.id} className={`overflow-hidden rounded-xl border ${darkMode ? "border-gray-700 bg-[#222224]" : 'border-gray-200 bg-white shadow-sm'}`}>
             {/*Study Head*/}
             <div className="relative h-36 overflow-hidden sm:h-44">
