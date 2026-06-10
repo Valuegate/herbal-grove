@@ -99,7 +99,7 @@ export default function Chatbox () {
   }
 
   return (
-    <main className={`min-h-screen px-4 py-4 sm:px-6 sm:py-6 ${darkMode ? 'bg-[#0f0f0f] text-[#e0e0e0]' : 'bg-[#f5f7f6]'}`}>
+    <main className={`px-4 py-4 sm:px-6 sm:py-6 ${darkMode ? 'bg-[#0f0f0f] text-[#e0e0e0]' : 'bg-[#f5f7f6]'}`}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5">
         <button onClick={handleBack} 
         className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${darkMode ? 'bg-[#222224] text-white border border-neutral-700 hover:border-neutral-700/50' : 'bg-emerald-50 text-[#222224] border border-emerald-100 hover:border-emerald-100'}`}>
@@ -108,7 +108,7 @@ export default function Chatbox () {
         </button>
       </div>
       
-      <section className={`mx-auto flex h-[calc(100vh-2rem)] min-h-112 w-full max-w-6xl flex-col overflow-hidden rounded-3xl shadow-lg relative ${darkMode ? 'border-neutral-700 bg-[#1c1c1c]' : 'border-slate-200 bg-white'}`}>
+      <section className={`mx-auto flex h-auto sm:h-[calc(100vh-2rem)] max-h-[calc(100vh-4rem)] min-h-112 w-full max-w-6xl flex-col overflow-hidden rounded-3xl shadow-lg relative ${darkMode ? 'border-neutral-700 bg-[#1c1c1c]' : 'border-slate-200 bg-white'}`}>
         {/* Header */}
         <header className={`flex h-20 items-center justify-between gap-3 border-b px-4 sm:px-6 ${darkMode ? 'border-neutral-800' : 'border-slate-100'}`}>
           <div className="flex items-center gap-4">
@@ -125,6 +125,7 @@ export default function Chatbox () {
                 </span>
               </div>
             </div>
+
           </div>
 
           <div className={`flex items-center gap-6 ${darkMode ? 'text-green-300' : 'text-green-500'}`}>
@@ -145,7 +146,7 @@ export default function Chatbox () {
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+                className={`max-w-xs lg:max-w-md ${msg.type === 'image' ? 'px-0 py-0 overflow-hidden' : 'px-4 py-2'} rounded-2xl ${
                   msg.role === "user"
                     ? darkMode
                       ? "bg-green-700 text-white"
@@ -157,7 +158,7 @@ export default function Chatbox () {
               >
                 {msg.type === "text" && <p className="text-sm">{msg.content}</p>}
                 {msg.type === "image" && (
-                  <img src={msg.content} alt="captured" className="rounded-lg max-w-xs h-auto" />
+                  <img src={msg.content} alt="captured" className="w-full h-auto max-h-[40vh] object-contain block" />
                 )}
               </div>
             </div>
@@ -200,12 +201,14 @@ export default function Chatbox () {
         {/* CAMERA MODAL */}
         {cameraOpen && (
           <div className={`absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-3xl ${darkMode ? 'bg-black/90' : 'bg-black/90'}`}>
-            <video 
-              ref={videoRef} 
-              autoPlay 
-              playsInline
-              className="w-full h-full object-cover"
-            />
+            <div className="w-full px-4 sm:px-6">
+              <video 
+                ref={videoRef} 
+                autoPlay 
+                playsInline
+                className="mx-auto max-h-[60vh] w-auto max-w-full object-contain rounded-lg"
+              />
+            </div>
 
             <div className="absolute bottom-8 flex gap-4 sm:gap-6">
               <button 

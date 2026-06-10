@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
+import { useSignUp } from "@clerk/nextjs";
 import { GoogleIcon, FacebookIcon, EyeIcon, EyeSlashIcon } from "../ui/icons";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -22,12 +23,33 @@ export const SignUpForm = () => {
   } = useForm<FormFields>();
 
   const router = useRouter();
+  const { signUp, fetchStatus } = useSignUp();
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log("Form Data:", data);
-    router.push("/signupsuccess");
-  };
+  if (fetchStatus === "fetching") return;
+
+  setApiError(null);
+
+  const [firstName, lastName] = data.fullname.trim().split(/\s+/, 2);
+
+  const { error } = await signUp.create({
+    emailAddress: data.email,
+    password: data.password,
+    firstName,
+    lastName,
+  });
+
+  console.log("SIGNUP ERROR:", error);
+
+  if (error) {
+    setApiError(error.longMessage || error.message);
+    return;
+  }
+
+  // ONLY redirect if creation succeeded
+  router.push("/dashboard");
+};
 
   // Common input style
   const inputStyle =
@@ -69,7 +91,7 @@ export const SignUpForm = () => {
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
         {/* Full Name */}
         <div className="space-y-1">
-          <label className="text-xs font-bold text-gray-700 font-heading">Full Name</label>
+          <label className="text-xs font-bold text-gray-700 font-heading">Name</label>
           <input
             {...register("fullname", { required: "Full name is required" })}
             type="text"
@@ -186,7 +208,9 @@ export const SignUpForm = () => {
             .
           </label>
         </div>
-
+        
+        {/* Clerk's CAPTCHA widget */}
+        <div id="clerk-captcha" data-cl-theme="dark" data-cl-size="flexible" data-cl-language="en-us" />
         <button
           disabled={isSubmitting}
           type="submit"
@@ -194,6 +218,10 @@ export const SignUpForm = () => {
         >
           {isSubmitting ? "Creating Account..." : "Create Account"}
         </button>
+
+        {apiError && (
+          <p className="text-center text-red-500 text-xs mt-2">{apiError}</p>
+        )}
 
         <p className="text-center text-xs text-gray-600 mt-4">
           Already have an account?{" "}

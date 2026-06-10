@@ -1,6 +1,9 @@
 "use client"
 
 import Link from "next/link"
+import { useClerk } from "@clerk/nextjs"
+import { useRouter } from "next/navigation"
+
 import { LeafLogo } from "@/components/ui/icons"
 import { XIcon } from "@/components/ui/icons"
 import { DashboardIcon } from "@/components/ui/icons"
@@ -15,6 +18,15 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onClose, darkMode }: SidebarProps) {
+  const { signOut } = useClerk();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut({
+      redirectUrl: "/"
+    });
+  };
+
   return (
     <>
       {/* Mobile Sidebar */}
@@ -92,7 +104,7 @@ export default function Sidebar({ isOpen, onClose, darkMode }: SidebarProps) {
 
         {/*Sidebar Footer*/}
         <div className={`p-4 border-t ${darkMode ? 'border-neutral-800' : 'border-white' }`}>
-          <button className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-600 transition duration-200">
+          <button onClick={handleLogout} className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 hover:text-red-600 transition duration-200 cursor-pointer">
             <LogoutIcon />
             <span>Logout</span>
           </button>

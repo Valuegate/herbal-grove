@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, type SubmitHandler } from "react-hook-form";
+import { useSignIn } from "@clerk/nextjs";
 import { GoogleIcon, FacebookIcon, EyeIcon, EyeSlashIcon } from "../ui/icons";
 import Link from "next/link";
 
@@ -13,17 +14,56 @@ type FormFields = {
 
 export const LoginForm = () => {
   const router = useRouter();
+  const { signIn, fetchStatus } = useSignIn();
+  const [apiError, setApiError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<FormFields>();
 
+  const getSignInErrorMessage = (error: any) => {
+    const code = error?.code;
+    switch (code) {
+      case "password_incorrect":
+      case "form_password_incorrect":
+        return "Incorrect password. Please try again.";
+      case "identifier_not_found":
+      case "user_not_found":
+        return "No account found for that email address.";
+      case "captcha_invalid":
+      case "captcha_missing_token":
+        return "Captcha validation failed. Please try again.";
+      default:
+        return error?.longMessage || error?.message || "Unable to sign in.";
+    }
+  };
+
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    console.log("Form Data:", data);
-    // Redirect to dashboard after successful login
-    router.push('/dashboard');
+    if (fetchStatus === "fetching") return;
+    setApiError(null);
+
+    const { error } = await signIn.create({
+      identifier: data.email,
+      password: data.password,
+    });
+
+    if (error) {
+      setApiError(getSignInErrorMessage(error));
+      return;
+    }
+
+    if (signIn.status === "complete") {
+      const { error: finalizeError } = await signIn.finalize();
+      if (finalizeError) {
+        setApiError(finalizeError.longMessage || finalizeError.message || "Unable to finish sign in.");
+        return;
+      }
+      router.push('/dashboard');
+      return;
+    }
+
+    setApiError("Sign in did not complete. Please try again.");
   };
 
   //Common input Style
@@ -131,8 +171,12 @@ export const LoginForm = () => {
           type="submit"
           className="w-full bg-[#1a7a1e] hover:bg-[#155d17] text-white font-bold py-3 rounded-lg shadow-lg transition-all active:scale-95 disabled:opacity-50"
         >
-          {isSubmitting ? "Login in to Account..." : "Login Account"}
+          {isSubmitting ? "Logging in..." : "Login Account"}
         </button>
+
+        {apiError && (
+          <p className="text-center text-red-500 text-xs mt-2">{apiError}</p>
+        )}
 
         <p className="text-center text-xs text-gray-600 mt-4">
           Don't have an account?{" "}

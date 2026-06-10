@@ -3,6 +3,10 @@
 import Image from "next/image";
 import Image1 from "@/components/researchlibrary/mint.jpg";
 import Image2 from "@/components/researchlibrary/ginseng.jpg"
+import Image3 from "@/components/researchlibrary/tumeric.jpg"
+import Image4 from "@/components/researchlibrary/withnae.jpg"
+import Image5 from "@/components/researchlibrary/chamomile.jpg"
+import Image6 from "@/components/researchlibrary/ginger.jpg"
 import { useDashboardContext } from "@/components/dashboard/DashboardContext";
 
 interface ResearchArticlesProps {
@@ -30,7 +34,7 @@ const articles = [
   },
   {
     id: 2,
-    photo: Image1,
+    photo: Image3,
     tags: ["Anti-inflammatory", "Joint Health"],
     readTime: "12 min read",
     title: "Curcuma Longa Extract for Arthritis Relief",
@@ -39,7 +43,7 @@ const articles = [
   },
   {
     id: 3,
-    photo: Image2,
+    photo: Image4,
     tags: ["Adaptogen", "Stress"],
     readTime: "10 min read",
     title: "Withania Somnifera: Stress Resilience and Cognitive Support",
@@ -48,7 +52,7 @@ const articles = [
   },
   {
     id: 4,
-    photo: Image1,
+    photo: Image5,
     tags: ["Sleep", "Relaxation"],
     readTime: "9 min read",
     title: "Matricaria Chamomilla and Its Role in Sleep Quality",
@@ -57,7 +61,7 @@ const articles = [
   },
   {
     id: 5,
-    photo: Image2,
+    photo: Image6,
     tags: ["Digestive", "Metabolism"],
     readTime: "14 min read",
     title: "Zingiber Officinale for Nausea and Gut Motility",

@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Manrope, Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ConvexClientProvider from "@/components/ConvexClientProvider";
-// ClerkProvider is commented out while auth is disabled
-// import { ClerkProvider } from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -39,9 +38,9 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${manrope.variable} ${inter.variable} ${geistMono.variable} antialiased`}
       >
-          {/* <ClerkProvider> */}
+        <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
           <ConvexClientProvider>{children}</ConvexClientProvider>
-          {/* </ClerkProvider> */}
+        </ClerkProvider>
       </body>
     </html>
   );
