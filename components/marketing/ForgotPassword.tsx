@@ -19,15 +19,15 @@ export const ForgotPassword = () => {
         </button>
       </Link>
 
-      <div className="relative flex flex-col lg:flex-row items-center justify-center w-full max-w-[1000px] gap-8 lg:gap-0">
+      <div className="relative flex flex-col lg:flex-row items-center justify-center w-full max-w-250 gap-8 lg:gap-0">
         {/* Left Card - Branding */}
-        <div className="z-0 w-full lg:w-[400px] rounded-[2rem] shadow-xl overflow-hidden lg:h-[500px] bg-white/80 mb-6 lg:mb-0 lg:-mr-[30px] lg:pr-[30px]">
+        <div className="z-0 w-full lg:w-100 rounded-[2rem] shadow-xl overflow-hidden lg:h-125 bg-white/80 mb-6 lg:mb-0 lg:-mr-7.5 lg:pr-7.5">
           <ForgotPasswordBrandSection />
         </div>
 
         {/* Right Card - Form */}
         <div 
-          className="z-10 w-full lg:w-[500px] rounded-[2rem] shadow-2xl overflow-hidden bg-[#FAFAFA] min-h-[40px]"
+          className="z-10 w-full lg:w-125 rounded-[2rem] shadow-2xl overflow-hidden bg-[#FAFAFA] min-h-10"
         >
           <ForgotPasswordForm />
         </div>

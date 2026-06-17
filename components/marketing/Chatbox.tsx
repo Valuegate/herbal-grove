@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useDashboardContext } from "@/components/dashboard/DashboardContext";
 import { useRef, useState } from "react";
+import { useAction } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 import { SendIcon } from "lucide-react";
 import { CameraIcon } from "lucide-react";
@@ -38,6 +40,12 @@ export default function Chatbox () {
       content: "Tell me what's on your mind or snap a herb!",
     },
   ]);
+  const [input, setInput] = useState("");
+  const [isSending, setIsSending] = useState(false);
+
+  const sendMessageAction = useAction(
+    api.ai_model.sendMessage
+  );
 
   const [cameraOpen, setCameraOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -45,6 +53,49 @@ export default function Chatbox () {
 
   const handleBack = () => {
     router.push('/dashboard');
+  };
+
+  const handleSend = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const messageText = input.trim();
+    if (!messageText || isSending) return;
+
+    const userMessage: Message = {
+      id: Date.now(),
+      role: "user",
+      type: "text",
+      content: messageText,
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setInput("");
+    setIsSending(true);
+
+    try {
+      const aiResponse = await sendMessageAction({ message: messageText });
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          role: "ai",
+          type: "text",
+          content: aiResponse ?? "Sorry, I didn't get a response.",
+        },
+      ]);
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          role: "ai",
+          type: "text",
+          content: "Something went wrong while sending your message. Please try again.",
+        },
+      ]);
+      console.error("AI send error:", error);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   // 📸 Start camera
@@ -163,19 +214,33 @@ export default function Chatbox () {
               </div>
             </div>
           ))}
+
+          {isSending && (
+            <div className="flex justify-start">
+              <div className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${darkMode ? 'bg-[#222224] text-gray-200' : 'bg-gray-200 text-gray-900'}`}>
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-sm font-medium">Herbal Mind AI is typing</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Input Footer */}
         <footer className={`border-t px-4 py-4 sm:px-5 sm:py-5 ${darkMode ? 'border-neutral-800 bg-[#161616]' : 'border-slate-100 bg-white'}`}>
           <form
             className="flex flex-col gap-4 sm:flex-row sm:items-center"
-            onSubmit={(event) => event.preventDefault()}
+            onSubmit={handleSend}
           >
             <div className={`flex h-11 flex-1 min-w-0 items-center rounded-xl px-4 sm:px-5 ${darkMode ? 'bg-[#222224]' : 'bg-[#eef4ff]'}`}>
               <input
+                value={input}
+                onChange={(event) => setInput(event.target.value)}
                 className={`h-full w-full min-w-0 flex-1 bg-transparent text-sm outline-none ${darkMode ? 'text-neutral-100 placeholder:text-green-300/80' : 'text-slate-800 placeholder:text-green-600/80'}`}
                 placeholder="Enter message..."
                 type="text"
+                disabled={isSending}
               />
 
               <button
@@ -183,14 +248,16 @@ export default function Chatbox () {
                 onClick={startCamera}
                 className="shrink-0 grid h-8 w-8 place-items-center rounded-full text-green-600 hover:opacity-80"
                 aria-label="Attach image"
+                disabled={isSending}
               >
                 <CameraIcon />
               </button>
 
               <button
                 type="submit"
-                className="shrink-0 grid h-8 w-8 place-items-center rounded-full bg-green-800 text-white hover:bg-green-700"
+                className="shrink-0 grid h-8 w-8 place-items-center rounded-full bg-green-800 text-white hover:bg-green-700 disabled:opacity-50"
                 aria-label="Send message"
+                disabled={!input.trim() || isSending}
               >
                 <SendIcon />
               </button>

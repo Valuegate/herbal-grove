@@ -73,6 +73,20 @@ export default function Sidebar({ isOpen, onClose, darkMode }: SidebarProps) {
             <span>Dashboard</span>
           </Link>
 
+          <Link href="/chat"
+            className={`flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 group ${
+              darkMode 
+                ? ' text-emerald-400' 
+                : ' text-[#2b7a2d]'
+            }`
+          }
+          >
+            <span className="shrink-0 transition-transform group-hover:scale-110">
+              <ChatBubbleIcon />
+            </span>
+            <span>Chat with AI</span>
+          </Link>
+
           <Link href="/consultant"
             className={`flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 group ${
               darkMode 

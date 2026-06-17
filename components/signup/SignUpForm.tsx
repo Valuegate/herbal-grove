@@ -40,7 +40,6 @@ export const SignUpForm = () => {
     lastName,
   });
 
-  console.log("SIGNUP ERROR:", error);
 
   if (error) {
     setApiError(error.longMessage || error.message);
