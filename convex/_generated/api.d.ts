@@ -9,6 +9,8 @@
  */
 
 import type * as ai_model from "../ai_model.js";
+import type * as conversations from "../conversations.js";
+import type * as messages from "../messages.js";
 
 import type {
   ApiFromModules,
@@ -18,6 +20,8 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   ai_model: typeof ai_model;
+  conversations: typeof conversations;
+  messages: typeof messages;
 }>;
 
 /**

@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import { useDashboardContext } from "@/components/dashboard/DashboardContext";
 import { useRef, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm"
 import { useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
@@ -207,7 +209,13 @@ export default function Chatbox () {
                     : "bg-gray-200 text-gray-900"
                 }`}
               >
-                {msg.type === "text" && <p className="text-sm">{msg.content}</p>}
+                {msg.type === "text" && (
+                  <div>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {msg.content}
+                    </ReactMarkdown>
+                  </div>
+                )}
                 {msg.type === "image" && (
                   <img src={msg.content} alt="captured" className="w-full h-auto max-h-[40vh] object-contain block" />
                 )}
