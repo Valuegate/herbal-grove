@@ -1,4 +1,4 @@
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 export const saveMessages = mutation({
@@ -20,3 +20,19 @@ export const saveMessages = mutation({
     });
   }
 });
+
+export const getMessages = query({
+  args: {
+    conversations: v.id("conversations")
+  },
+
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("messages")
+      .withIndex("by_conversation", (q) => 
+        q.eq("conversationId", args.conversations)
+      )
+      .order("asc")
+      .collect()
+  }
+})

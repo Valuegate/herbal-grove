@@ -1,3 +1,10 @@
+"use client"
+
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useRouter } from "next/navigation";
+
+
 const SparkleIcon = () => (
   <svg className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 24 24">
     {/* Large Sparkle */}
@@ -12,41 +19,29 @@ interface AIChatHistoryProps {
   searchQuery: string;
 }
 
-const myChatHistory = [
-  {
-    id: 1,
-    title: "Causes of Seasonal Fatigues",
-    date: "Today"
-  },
-  {
-    id: 2,
-    title: "Herbal remedies of Diarrhea",
-    date: "April 23"
-  },
-  {
-    id: 3,
-    title: "Benefits of Ginger for Digestion",
-    date: "April 21"
-  },
-  {
-    id: 4,
-    title: "Natural Sleep Aids: Chamomile and Lavender",
-    date: "April 18"
-  },
-  {
-    id: 5,
-    title: "Immune Boosting Herbs for Winter",
-    date: "April 15"
-  },
-]
-
 export default function AIChatHistory ({ darkMode, searchQuery }: AIChatHistoryProps) {
-  //Search Functionality
-  const filterBlogs = myChatHistory.filter(blog => 
-    blog.title.toLocaleLowerCase().includes(searchQuery.toLocaleLowerCase())
+  const router = useRouter();
+
+  const conversations = useQuery(
+    api.conversations.getConversations
+  )
+
+  const deleteConversation = useMutation(
+    api.conversations.deleteConversation
   );
 
-  if (filterBlogs.length === 0) {
+  if (conversations === undefined) {
+    return <div>Loading chats...</div>;
+  }
+
+  //Search Functionality
+  const filterChats = conversations?.filter((conversation) => 
+    conversation.title
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase())
+  ) ?? [];
+
+  if (filterChats.length === 0) {
     return (
       <div className={`
         flex flex-col items-center justify-center text-center py-12 px-6
@@ -71,14 +66,15 @@ export default function AIChatHistory ({ darkMode, searchQuery }: AIChatHistoryP
       <div className="space-y-4">
         <div className='px-1 flex items-center justify-between'>
           <span className={`text-sm font-extrabold uppercase tracking-wider ${darkMode ? 'text-white' : 'text-[#222224]'}`}>
-            Saved Articles ({filterBlogs.length})
+            Chats ({filterChats.length})
           </span>
         </div>
   
         <div>
-          {myChatHistory.map((chat) => (
+          {filterChats.map((chat) => (
             <div
-              key={chat.id}
+              key={chat._id}
+              onClick={() => router.push(`/chat?conversationId=${chat._id}`)}
               className={`p-4 flex items-center justify-between gap-4 divide-y ${darkMode ? 'hover:bg-[#2b2b2b]' : 'hover:bg-gray-200'}`}
             >
               <div className="flex items-center gap-4">
@@ -92,10 +88,30 @@ export default function AIChatHistory ({ darkMode, searchQuery }: AIChatHistoryP
                 </h4>
               </div>
 
-              {/* Date */}
-              <span className={`text-xs font-bold uppercase shrink-0 ${darkMode ? 'text-neutral-400' : 'text-gray-400'}`}>
-                {chat.date}
-              </span>
+              <div className="flex items-center gap-7">
+                {/* Date */}
+                <span className={`text-xs font-bold uppercase shrink-0 ${darkMode ? 'text-neutral-400' : 'text-gray-400'}`}>
+                  {new Date(chat.createdAt).toLocaleDateString()}
+                </span>
+
+                <button
+                  onClick={async (e) => {
+                    e.stopPropagation();
+                    const confirmed = window.confirm(
+                      "Delete this conversation?"
+                    );
+
+                    if (!confirmed) return;
+
+                    await deleteConversation({
+                      conversationId: chat._id,
+                    });
+                  }}
+                  className="text-red-500 text-xs font-bold"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           ))}
         </div>

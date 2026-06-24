@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useDashboardContext } from "@/components/dashboard/DashboardContext";
 import AIChatHistory from "@/components/activityhistory/AIChatHistory";
 import SavedPosts from "@/components/activityhistory/savedPosts";
@@ -11,13 +11,18 @@ import { Search } from "lucide-react";
 
 export default function ActivityHistory() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
   const { darkMode } = useDashboardContext();
-  const [activeTab, setActiveTab] = useState<'posts' | 'chats'>('posts'); 
   const [searchQuery, setSearchQuery] = useState('');
+  
   const handleBack = () => {
     router.push('/dashboard');
   };
-
+  
+  const tabs = searchParams.get("tab") ===  "chats" ? "chats" : "posts"
+  const [activeTab, setActiveTab] = useState<'posts' | 'chats'>(tabs); 
+  
   return (
     <div className="space-y-8">
       {/*Back & Search Bar*/}

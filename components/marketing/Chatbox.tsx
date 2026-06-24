@@ -1,12 +1,13 @@
 "use client"
 
-import { useRouter } from "next/navigation";
+import { useMutation, useQuery, useAction } from "convex/react";
+import { api } from "@/convex/_generated/api";
+
+import { useSearchParams, useRouter } from "next/navigation";
 import { useDashboardContext } from "@/components/dashboard/DashboardContext";
-import { useRef, useState } from "react";
+import { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm"
-import { useAction } from "convex/react";
-import { api } from "@/convex/_generated/api";
 
 import { SendIcon } from "lucide-react";
 import { CameraIcon } from "lucide-react";
@@ -23,41 +24,70 @@ const SparkleIcon = () => (
   </svg>
 );
 
+type Message = {
+  id: number;
+  role: "user" | "assistant";
+  type: "text";
+  content: string;
+};
+
 export default function Chatbox () {
   const router = useRouter();
   const { darkMode } = useDashboardContext();
+  const searchParams = useSearchParams();
+  const selectedConversationId = searchParams.get("conversationId");
 
-  type Message = {
-    id: number;
-    role: "user" | "ai";
-    type: "text" | "image";
-    content: string;
-  };
+  const existingMessages = useQuery(api.messages.getMessages, selectedConversationId ? { conversations: selectedConversationId as any} : "skip");
+
+  useEffect(() => {
+  if (!existingMessages) return;
+
+  const formattedMessages = existingMessages.map((msg) => ({
+    id: Number(msg._creationTime),
+    role: msg.role,
+    type: "text" as const,
+    content: msg.content,
+  }));
+
+  setMessages(formattedMessages);
+}, [existingMessages]);
+
+
 
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      role: "ai",
+      role: "assistant",
       type: "text",
       content: "Tell me what's on your mind or snap a herb!",
     },
   ]);
+
+  const [conversationId, setConversationId] = useState<any>(null)
+
   const [input, setInput] = useState("");
   const [isSending, setIsSending] = useState(false);
 
+  const createConversation = useMutation(
+    api.conversations.createConversation
+  )
+
+  const updateConversation = useMutation(
+    api.conversations.updateConversation
+  )
   const sendMessageAction = useAction(
     api.ai_model.sendMessage
   );
 
-  const [cameraOpen, setCameraOpen] = useState(false);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  const saveMessages = useMutation(
+    api.messages.saveMessages
+  )
 
   const handleBack = () => {
     router.push('/dashboard');
   };
 
-  const handleSend = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSend = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     const messageText = input.trim();
     if (!messageText || isSending) return;
@@ -73,23 +103,52 @@ export default function Chatbox () {
     setInput("");
     setIsSending(true);
 
+    let currentConversationId = selectedConversationId ?? conversationId;
+    if (!currentConversationId) {
+      currentConversationId = await createConversation({
+        title: messageText.slice(0, 50)
+      })
+
+      setConversationId(currentConversationId)
+    }
+
+    
     try {
+      await saveMessages({
+        conversationId: currentConversationId,
+        role: "user",
+        content: messageText
+      })
+
+      await updateConversation({
+        conversationId: currentConversationId
+      })
+      
+      console.log("Updating conversation", currentConversationId);
+
       const aiResponse = await sendMessageAction({ message: messageText });
       setMessages((prev) => [
         ...prev,
         {
           id: Date.now() + 1,
-          role: "ai",
+          role: "assistant",
           type: "text",
           content: aiResponse ?? "Sorry, I didn't get a response.",
         },
       ]);
+
+      await saveMessages({
+      conversationId: currentConversationId,
+      role: "assistant",
+      content: aiResponse ?? "Sorry, I didn't get a respomse"
+    })
+
     } catch (error) {
       setMessages((prev) => [
         ...prev,
         {
           id: Date.now() + 1,
-          role: "ai",
+          role: "assistant",
           type: "text",
           content: "Something went wrong while sending your message. Please try again.",
         },
@@ -100,57 +159,6 @@ export default function Chatbox () {
     }
   };
 
-  // 📸 Start camera
-  const startCamera = async () => {
-    setCameraOpen(true);
-
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode: { ideal: "environment" }
-      },
-    });
-
-    streamRef.current = stream;
-
-    if (videoRef.current) {
-      videoRef.current.srcObject = stream;
-    }
-  };
-
-  // Stop camera
-  const stopCamera = () => {
-    streamRef.current?.getTracks().forEach((track) => track.stop());
-    setCameraOpen(false);
-  };
-
-  //  Capture image
-  const captureImage = () => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    ctx.drawImage(video, 0, 0);
-
-    const imageUrl = canvas.toDataURL("image/png");
-
-    const newMessage: Message = {
-      id: Date.now(),
-      role: "user",
-      type: "image",
-      content: imageUrl,
-    };
-
-    setMessages((prev) => [...prev, newMessage]);
-
-    stopCamera();
-  }
-
   return (
     <main className={`px-4 py-4 sm:px-6 sm:py-6 ${darkMode ? 'bg-[#0f0f0f] text-[#e0e0e0]' : 'bg-[#f5f7f6]'}`}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5">
@@ -159,9 +167,20 @@ export default function Chatbox () {
           <ArrowUpLeftIcon className="w-4 h-4" />
           <span>Dashboard</span>
         </button>
+
+        <button
+          onClick={() => router.push("/dashboard/history?tab=chats")}
+          className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold ${
+            darkMode
+              ? "bg-[#222224] text-white border border-neutral-700 hover:border-neutral-700/50"
+              : "bg-emerald-50 text-[#222224] border border-emerald-100 hover:border-emerald-100"
+          }`}
+        >
+          Chat History
+        </button>
       </div>
       
-      <section className={`mx-auto flex h-auto sm:h-[calc(100vh-2rem)] max-h-[calc(100vh-4rem)] min-h-112 w-full max-w-6xl flex-col overflow-hidden rounded-3xl shadow-lg relative ${darkMode ? 'border-neutral-700 bg-[#1c1c1c]' : 'border-slate-200 bg-white'}`}>
+      <section className={`mx-auto flex h-[calc(100vh-2rem)] w-full max-w-6xl flex-col overflow-hidden rounded-3xl shadow-lg relative ${darkMode ? 'border-neutral-700 bg-[#1c1c1c]' : 'border-slate-200 bg-white'}`}>
         {/* Header */}
         <header className={`flex h-20 items-center justify-between gap-3 border-b px-4 sm:px-6 ${darkMode ? 'border-neutral-800' : 'border-slate-100'}`}>
           <div className="flex items-center gap-4">
@@ -199,7 +218,7 @@ export default function Chatbox () {
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-xs lg:max-w-md ${msg.type === 'image' ? 'px-0 py-0 overflow-hidden' : 'px-4 py-2'} rounded-2xl ${
+                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
                   msg.role === "user"
                     ? darkMode
                       ? "bg-green-700 text-white"
@@ -209,16 +228,9 @@ export default function Chatbox () {
                     : "bg-gray-200 text-gray-900"
                 }`}
               >
-                {msg.type === "text" && (
-                  <div>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {msg.content}
-                    </ReactMarkdown>
-                  </div>
-                )}
-                {msg.type === "image" && (
-                  <img src={msg.content} alt="captured" className="w-full h-auto max-h-[40vh] object-contain block" />
-                )}
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {msg.content}
+                </ReactMarkdown>
               </div>
             </div>
           ))}
@@ -253,10 +265,9 @@ export default function Chatbox () {
 
               <button
                 type="button"
-                onClick={startCamera}
                 className="shrink-0 grid h-8 w-8 place-items-center rounded-full text-green-600 hover:opacity-80"
                 aria-label="Attach image"
-                disabled={isSending}
+                disabled
               >
                 <CameraIcon />
               </button>
@@ -272,35 +283,6 @@ export default function Chatbox () {
             </div>
           </form>
         </footer>
-
-        {/* CAMERA MODAL */}
-        {cameraOpen && (
-          <div className={`absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-3xl ${darkMode ? 'bg-black/90' : 'bg-black/90'}`}>
-            <div className="w-full px-4 sm:px-6">
-              <video 
-                ref={videoRef} 
-                autoPlay 
-                playsInline
-                className="mx-auto max-h-[60vh] w-auto max-w-full object-contain rounded-lg"
-              />
-            </div>
-
-            <div className="absolute bottom-8 flex gap-4 sm:gap-6">
-              <button 
-                onClick={captureImage}
-                className="px-6 py-3 bg-green-600 text-white rounded-full font-semibold hover:bg-green-700 transition"
-              >
-                📸 Capture
-              </button>
-              <button 
-                onClick={stopCamera}
-                className="px-6 py-3 bg-red-600 text-white rounded-full font-semibold hover:bg-red-700 transition"
-              >
-                ❌ Close
-              </button>
-            </div>
-          </div>
-        )}
       </section>
     </main>
   );
