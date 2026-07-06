@@ -20,3 +20,5 @@ export default function ConvexClientProvider({
     </ConvexProviderWithClerk>
   );
 }
+
+console.log("Convex URL:", process.env.NEXT_PUBLIC_CONVEX_URL);
