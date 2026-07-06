@@ -6,8 +6,7 @@ import { api } from "@/convex/_generated/api";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useDashboardContext } from "@/components/dashboard/DashboardContext";
 import { useState, useEffect } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm"
+import MarkdownRenderer from "@/components/markdown/MarkdownRenderer"
 
 import { SendIcon } from "lucide-react";
 import { CameraIcon } from "lucide-react";
@@ -218,7 +217,7 @@ export default function Chatbox () {
               className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+                className={`max-w-[85%] lg:max-w-4xl px-4 py-2 rounded-2xl ${
                   msg.role === "user"
                     ? darkMode
                       ? "bg-green-700 text-white"
@@ -228,9 +227,7 @@ export default function Chatbox () {
                     : "bg-gray-200 text-gray-900"
                 }`}
               >
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {msg.content}
-                </ReactMarkdown>
+                <MarkdownRenderer content={msg.content} />
               </div>
             </div>
           ))}
