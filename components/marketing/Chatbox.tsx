@@ -179,7 +179,7 @@ export default function Chatbox () {
         </button>
       </div>
       
-      <section className={`mx-auto flex h-[calc(100vh-2rem)] w-full max-w-6xl flex-col overflow-hidden rounded-3xl shadow-lg relative ${darkMode ? 'border-neutral-700 bg-[#1c1c1c]' : 'border-slate-200 bg-white'}`}>
+      <section className={`mx-auto flex min-h-[calc(100vh-4rem)] md:h-[calc(100vh-2rem)] w-full max-w-6xl flex-col overflow-hidden rounded-3xl shadow-lg relative ${darkMode ? 'border-neutral-700 bg-[#1c1c1c]' : 'border-slate-200 bg-white'}`}>
         {/* Header */}
         <header className={`flex h-20 items-center justify-between gap-3 border-b px-4 sm:px-6 ${darkMode ? 'border-neutral-800' : 'border-slate-100'}`}>
           <div className="flex items-center gap-4">
