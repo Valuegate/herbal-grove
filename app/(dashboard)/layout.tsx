@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Sidebar from "@/components/dashboard/sidebar";
-import { DashboardProvider } from "@/components/dashboard/DashboardContext";
-import { NotificationIcon } from "@/components/ui/icons";
-import { ProfileIcon } from "@/components/ui/icons";
-import { ModeChangeIcon } from "@/components/ui/icons";
+import { useUIStateContext } from "@/components/UIStateContext";
+import {
+  NotificationIcon,
+  ProfileIcon,
+  ModeChangeIcon,
+} from "@/components/ui/icons";
+import { USER_PAGE_TITLES } from "@/lib/constants";
 
 function MenuIcon() {
   return (
@@ -27,32 +29,30 @@ function MenuIcon() {
   );
 }
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-  const pathname = usePathname();
-  const pageTitle = pathname?.includes("/history") ? "Activity History"
-    : pathname?.includes("/chat") ? "Chatbox"
-    : pathname?.includes("/consultant") ? "Chat Consultant"
-    : pathname?.includes("/consultantchat") ? "Chat with A Consultant"
-    : pathname?.includes("/researchlibrary") ? "Research Library"
-    : "Dashboard";
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const {
+    darkMode,
+    toggleDarkMode,
+    sidebarOpen,
+    openSidebar,
+    closeSidebar,
+  } = useUIStateContext();
 
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-  const closeSidebar = () => setSidebarOpen(false);
-  const toggleDarkMode = () => setDarkMode(!darkMode);
+  const pathname = usePathname();
+
+  const pageTitle = USER_PAGE_TITLES[pathname] ?? "Dashboard";
+
+  const toggleSidebar = () => {
+    sidebarOpen ? closeSidebar() : openSidebar();
+  };
+
 
   return (
-    <DashboardProvider
-      value={{
-        darkMode,
-        toggleDarkMode,
-        sidebarOpen,
-        openSidebar: toggleSidebar,
-        closeSidebar,
-      }}
-    >
-      <div className={`min-h-screen font-sans flex transition-colors duration-300 ${darkMode ? 'bg-[#121212] text-[#e0e0e0]' : 'bg-[#FAFAFA] text-[#333333]'}`}>
+    <div className={`min-h-screen font-sans flex transition-colors duration-300 ${darkMode ? 'bg-[#121212] text-[#e0e0e0]' : 'bg-[#FAFAFA] text-[#333333]'}`}>
         <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} darkMode={darkMode} />
 
         <div className="flex-1 flex flex-col h-screen overflow-y-auto">
@@ -101,6 +101,5 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </main>
         </div>
       </div>
-    </DashboardProvider>
   );
 }

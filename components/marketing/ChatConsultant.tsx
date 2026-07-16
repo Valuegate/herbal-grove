@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useDashboardContext } from "@/components/dashboard/DashboardContext";
+import { useUIStateContext } from "@/components/UIStateContext";
 import { UserRound, Star } from "lucide-react";
 
 
@@ -34,7 +34,7 @@ const chatConsultants = [
 ]
 
 export default function ChatConsultant() {
-  const { darkMode } = useDashboardContext();
+  const { darkMode } = useUIStateContext();
 
   return (
     <section className="px-4 py-6">

@@ -1,9 +1,9 @@
 "use client";
 
-import { useDashboardContext } from "@/components/dashboard/DashboardContext";
+import { useUIStateContext } from "@/components/UIStateContext";
 
 export default function LatestPublication() {
-  const { darkMode } = useDashboardContext();
+  const { darkMode } = useUIStateContext();
 
   return (
     <section className="space-y-6 py-6">

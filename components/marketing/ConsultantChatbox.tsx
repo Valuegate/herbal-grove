@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation";
-import { useDashboardContext } from "@/components/dashboard/DashboardContext";
+import { useUIStateContext } from "@/components/UIStateContext";
 import Link from "next/link";
 
 import { SendIcon } from "lucide-react";
@@ -21,7 +21,7 @@ const SparkleIcon = () => (
 
 export default function ConsultantChatbox () {
   const router = useRouter();
-  const { darkMode } = useDashboardContext();
+  const { darkMode } = useUIStateContext();
 
   const handleBack = () => {
     router.push('/dashboard');

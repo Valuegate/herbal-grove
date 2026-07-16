@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useDashboardContext } from "@/components/dashboard/DashboardContext";
+import { useUIStateContext } from "@/components/UIStateContext";
 import AIChatHistory from "@/components/activityhistory/AIChatHistory";
 import SavedPosts from "@/components/activityhistory/savedPosts";
 
@@ -13,7 +13,7 @@ export default function ActivityHistory() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const { darkMode } = useDashboardContext();
+  const { darkMode } = useUIStateContext();
   const [searchQuery, setSearchQuery] = useState('');
   
   const handleBack = () => {

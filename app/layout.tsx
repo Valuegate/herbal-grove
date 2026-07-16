@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Manrope, Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ConvexClientProvider from "@/components/ConvexClientProvider";
+import { UIStateProvider } from "@/components/UIStateContext";
 import { ClerkProvider } from "@clerk/nextjs";
 
 const manrope = Manrope({
@@ -39,7 +40,9 @@ export default function RootLayout({
         className={`${manrope.variable} ${inter.variable} ${geistMono.variable} antialiased`}
       >
         <ClerkProvider publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}>
-          <ConvexClientProvider>{children}</ConvexClientProvider>
+          <ConvexClientProvider>
+            <UIStateProvider>{children}</UIStateProvider>
+          </ConvexClientProvider>
         </ClerkProvider>
       </body>
     </html>

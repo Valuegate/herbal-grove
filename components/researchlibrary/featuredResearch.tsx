@@ -7,7 +7,7 @@ import Image3 from "@/components/researchlibrary/tumeric.jpg"
 import Image4 from "@/components/researchlibrary/withnae.jpg"
 import Image5 from "@/components/researchlibrary/chamomile.jpg"
 import Image6 from "@/components/researchlibrary/ginger.jpg"
-import { useDashboardContext } from "@/components/dashboard/DashboardContext";
+import { useUIStateContext } from "@/components/UIStateContext";
 
 interface ResearchArticlesProps {
   searchQuery: string
@@ -71,7 +71,7 @@ const articles = [
 ];
 
 export default function FeaturedResearch ({ searchQuery }: ResearchArticlesProps) {
-  const { darkMode } = useDashboardContext();
+  const { darkMode } = useUIStateContext();
 
   //Search Functionality
   const researchFilter = articles.filter(research => 

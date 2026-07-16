@@ -2,13 +2,13 @@
 
 import { Search } from "lucide-react";
 import { useState } from "react";
-import { useDashboardContext } from "@/components/dashboard/DashboardContext";
+import { useUIStateContext } from "@/components/UIStateContext";
 import FeaturedResearch from "@/components/researchlibrary/featuredResearch";
 import LatestPublication from "@/components/researchlibrary/publications";
 
 
 export default function ResearchLibrary() {
-  const { darkMode } = useDashboardContext();
+  const { darkMode } = useUIStateContext();
   const [searchQuery, setSearchQuery] = useState("");
   return (
     <div className="px-4 py-6">

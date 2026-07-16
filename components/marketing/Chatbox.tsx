@@ -4,7 +4,7 @@ import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useDashboardContext } from "@/components/dashboard/DashboardContext";
+import { useUIStateContext } from "@/components/UIStateContext";
 import { useState, useEffect } from "react";
 import MarkdownRenderer from "@/components/markdown/MarkdownRenderer"
 
@@ -32,7 +32,7 @@ type Message = {
 
 export default function Chatbox () {
   const router = useRouter();
-  const { darkMode } = useDashboardContext();
+  const { darkMode } = useUIStateContext();
   const searchParams = useSearchParams();
   const selectedConversationId = searchParams.get("conversationId");
 
