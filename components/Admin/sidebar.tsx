@@ -1,7 +1,5 @@
 "use client"
 
-console.log("🔥 ADMIN SIDEBAR LOADED");
-
 import Link from "next/link"
 import { useClerk } from "@clerk/nextjs"
 import { usePathname } from "next/navigation"
