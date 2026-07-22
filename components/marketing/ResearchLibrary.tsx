@@ -3,8 +3,8 @@
 import { Search } from "lucide-react";
 import { useState } from "react";
 import { useUIStateContext } from "@/components/UIStateContext";
-import FeaturedResearch from "@/components/researchlibrary/featuredResearch";
-import LatestPublication from "@/components/researchlibrary/publications";
+import FeaturedResearch from "@/components/researchlibrary/FeaturedResearch";
+import LatestPublication from "@/components/researchlibrary/LatestPublications";
 
 
 export default function ResearchLibrary() {

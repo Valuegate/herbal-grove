@@ -9,6 +9,7 @@ import DocumentTable from "@/components/Admin/knowledge-base/DocumentTable";
 
 export default function KnowledgeBase() {
   const [openUploadModal, setOpenUploadModal] = useState(false);
+  const [search, setSearch] = useState("");
 
   return (
     <div className="space-y-8">
@@ -20,7 +21,7 @@ export default function KnowledgeBase() {
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 justify-between">
-        <SearchBar />
+        <SearchBar value={search} onChange={setSearch} />
         <UploadButton
           onClick={() => setOpenUploadModal(true)}
         />
@@ -31,7 +32,7 @@ export default function KnowledgeBase() {
         />
       </div>
 
-      <DocumentTable />
+      <DocumentTable search={search} />
     </div>
   );
 }
