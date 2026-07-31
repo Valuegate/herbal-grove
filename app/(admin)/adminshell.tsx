@@ -3,34 +3,13 @@
 import { usePathname } from "next/navigation";
 import Sidebar from "@/components/Admin/sidebar";
 import { useUIStateContext } from "@/components/UIStateContext";
-import { NotificationIcon } from "@/components/ui/icons";
-import { ProfileIcon } from "@/components/ui/icons";
-import { ModeChangeIcon } from "@/components/ui/icons";
-
-function MenuIcon() {
-  return (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <line x1="3" y1="6" x2="21" y2="6" />
-      <line x1="3" y1="12" x2="21" y2="12" />
-      <line x1="3" y1="18" x2="21" y2="18" />
-    </svg>
-  );
-}
+import { NotificationIcon, ProfileIcon, ModeChangeIcon, MenuIcon } from "@/components/ui/icons";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { darkMode, toggleDarkMode, sidebarOpen, openSidebar, closeSidebar } = useUIStateContext();
   const pathname = usePathname();
   const pageTitles: Record<string, string> = {
-    "/admin": "Dashboard",
+    "/admin/dashboard": "Dashboard",
     "/admin/knowledge-base": "Knowledge Base",
     "/admin/herbs": "Herbs",
   };
@@ -56,17 +35,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             ${darkMode ? "bg-[#1e1e1e]/80 border-neutral-800" : "bg-[#FAFAFA]/80 border-gray-100"}
           `}
         >
-          <div className="flex items-center gap-4">
+          <div className="flex items-center">
             <button
               onClick={toggleSidebar}
-              className={`lg:hidden p-2 rounded-lg transition text-gray-500 ${darkMode ? "hover:bg-neutral-800" : "hover:bg-gray-100"}`}
-              aria-label="Open sidebar"
+              className={`lg:hidden p-2 rounded-lg transition ${
+                darkMode ? "hover:bg-neutral-800" : "hover:bg-gray-100"
+              }`}
+              aria-label="Open Sidebar"
             >
               <MenuIcon />
             </button>
-            <h1 className={`text-base font-bold uppercase tracking-wider ${darkMode ? "text-white" : "text-[#2b7a2d]"}`}>{pageTitle}</h1>
           </div>
-
           <div className="flex items-center gap-3">
             <button
               className={`p-2.5 rounded-full shadow-sm hover:scale-105 active:scale-95 transition-all duration-150 ${darkMode ? "bg-[#1e1e1e] hover:bg-neutral-800 text-neutral-300" : "bg-white hover:bg-gray-50 text-gray-600"}`}

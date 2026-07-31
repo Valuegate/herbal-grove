@@ -47,7 +47,7 @@ export const SignUpForm = () => {
   }
 
   // ONLY redirect if creation succeeded
-  router.push("/dashboard");
+  router.push("/signup-successful");
 };
 
   // Common input style

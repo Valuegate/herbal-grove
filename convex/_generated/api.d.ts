@@ -10,6 +10,9 @@
 
 import type * as ai_model from "../ai_model.js";
 import type * as chunk from "../chunk.js";
+import type * as consultants from "../consultants.js";
+import type * as consultationMessages from "../consultationMessages.js";
+import type * as consultations from "../consultations.js";
 import type * as conversations from "../conversations.js";
 import type * as dashboard from "../dashboard.js";
 import type * as documentHerbs from "../documentHerbs.js";
@@ -27,6 +30,9 @@ import type {
 declare const fullApi: ApiFromModules<{
   ai_model: typeof ai_model;
   chunk: typeof chunk;
+  consultants: typeof consultants;
+  consultationMessages: typeof consultationMessages;
+  consultations: typeof consultations;
   conversations: typeof conversations;
   dashboard: typeof dashboard;
   documentHerbs: typeof documentHerbs;

@@ -39,32 +39,67 @@ export const LoginForm = () => {
     }
   };
 
+  // const onSubmit: SubmitHandler<FormFields> = async (data) => {
+  //   if (fetchStatus === "fetching") return;
+  //   setApiError(null);
+
+  //   const { error } = await signIn.create({
+  //     identifier: data.email,
+  //     password: data.password,
+  //   });
+
+  //   if (error) {
+  //     setApiError(getSignInErrorMessage(error));
+  //     return;
+  //   }
+
+  //   if (signIn.status === "complete") {
+  //     const { error: finalizeError } = await signIn.finalize();
+  //     if (finalizeError) {
+  //       setApiError(finalizeError.longMessage || finalizeError.message || "Unable to finish sign in.");
+  //       return;
+  //     }
+  //     router.push('/redirect');
+  //     return;
+  //   }
+
+  //   setApiError("Sign in did not complete. Please try again.");
+  // };
+
+
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
-    if (fetchStatus === "fetching") return;
-    setApiError(null);
+  if (fetchStatus === "fetching") return;
 
-    const { error } = await signIn.create({
-      identifier: data.email,
-      password: data.password,
-    });
+  setApiError(null);
 
-    if (error) {
-      setApiError(getSignInErrorMessage(error));
+  const { error } = await signIn.create({
+    identifier: data.email,
+    password: data.password,
+  });
+
+  if (error) {
+    setApiError(getSignInErrorMessage(error));
+    return;
+  }
+
+  if (signIn.status === "complete") {
+    const { error: finalizeError } = await signIn.finalize();
+
+    if (finalizeError) {
+      setApiError(
+        finalizeError.longMessage ??
+        finalizeError.message ??
+        "Unable to finish sign in."
+      );
       return;
     }
 
-    if (signIn.status === "complete") {
-      const { error: finalizeError } = await signIn.finalize();
-      if (finalizeError) {
-        setApiError(finalizeError.longMessage || finalizeError.message || "Unable to finish sign in.");
-        return;
-      }
-      router.push('/dashboard');
-      return;
-    }
+    router.push("/redirect");
+    return;
+  }
 
-    setApiError("Sign in did not complete. Please try again.");
-  };
+  setApiError("Sign in did not complete.");
+};
 
   //Common input Style
   const inputStyle = "w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-green focus:border-transparent outline-none transition-all text-black text-sm";

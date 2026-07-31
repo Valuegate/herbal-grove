@@ -4,40 +4,25 @@ import Image from "next/image";
 import Link from "next/link";
 import { useUIStateContext } from "@/components/UIStateContext";
 import { UserRound, Star } from "lucide-react";
+import { useRouter } from "next/navigation";
 
-
-const chatConsultants = [
-  {
-    id: 0,
-    avatar: "https://i.pravatar.cc/80?img=32",
-    name: "Dr. Ashley",
-    role: "Herbal expert",
-    availability: "Online",
-    date: "Jan 12"
-  },
-  {
-    id: 1,
-    avatar: "https://i.pravatar.cc/80?img=56",
-    name: "Pharm. Greg",
-    role: "Herbal expert",
-    availability: "Online",
-    date: "Jan 12"
-  },
-  {
-    id: 2,
-    avatar: "https://i.pravatar.cc/80?img=12",
-    name: "Dr. Timothy",
-    role: "Herbal expert",
-    availability: "Online",
-    date: "Jan 12"
-  },
-]
+import { useQuery, useMutation } from "convex/react";
+import { useUser } from "@clerk/nextjs";
+import { api } from "@/convex/_generated/api";
 
 export default function ChatConsultant() {
   const { darkMode } = useUIStateContext();
+  const consultants = useQuery(api.consultants.getAllConsultants);
+  const { user } = useUser();
+  const router = useRouter();
+  const createConsultation = useMutation(api.consultations.createConsultation);
+
+  if(!consultants) {
+    return <p>Loading.....</p>
+  }
 
   return (
-    <section className="px-4 py-6">
+    <section className="px-4">
       <div className={`mx-auto flex min-h-28.75 max-w-6xl flex-col items-center justify-center rounded-xl px-6 py-8 text-center transition-colors ${darkMode ? "bg-[#222224] text-white" : "bg-white text-black"}`}>
         <div className={`mb-3 inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-[#f7f7f7] px-3 py-1 text-[10px] font-medium text-slate-800`}>
           <UserRound className="w-3.5 h-3.5" />
@@ -63,7 +48,7 @@ export default function ChatConsultant() {
               darkMode ? "text-neutral-300" : "text-neutral-600"
             }`}
           >
-            {chatConsultants.length} Consultants available
+            {consultants.length} Consultants available
           </span>
 
           <Link
@@ -85,9 +70,9 @@ export default function ChatConsultant() {
 
         {/* Available Consultants */}
         <div className="space-y-4">
-          {chatConsultants.map((consultant) => (
+          {consultants.map((consultant) => (
             <div
-              key={consultant.id}
+              key={consultant._id}
               className={`
                 flex flex-col sm:flex-row items-start sm:items-start justify-between gap-4 sm:gap-6 rounded-xl border px-5 py-7 transition-all duration-200
                 ${
@@ -100,8 +85,8 @@ export default function ChatConsultant() {
               <div className="flex items-start gap-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200 text-lg shadow-inner select-none">
                   <Image
-                    src={consultant.avatar}
-                    alt={consultant.name}
+                    src={consultant.imageUrl || "/default-avatar.png"}
+                    alt={consultant.fullName}
                     width={50}
                     height={50}
                   />
@@ -114,7 +99,7 @@ export default function ChatConsultant() {
                         darkMode ? "text-white" : "text-black"
                       }`}
                     >
-                      {consultant.name}
+                      {consultant.fullName}
                     </h4>
 
                     <p
@@ -122,7 +107,7 @@ export default function ChatConsultant() {
                         darkMode ? "text-neutral-300" : "text-neutral-700"
                       }`}
                     >
-                      {consultant.role}
+                      Clinical Herbal Consultant
                     </p>
                   </div>
 
@@ -171,20 +156,29 @@ export default function ChatConsultant() {
                       darkMode ? "text-neutral-300" : "text-neutral-700"
                     }`}
                   >
-                    Replies in under 1 hour{" "}
+                    {consultant.description?.slice(0,80)}
                     <span className="font-semibold text-green-700">
-                      * {consultant.availability}
+                      * {consultant.isOnline ? "Online" : "Offline"}
                     </span>
                   </p>
                 </div>
               </div>
-              <Link href="/consultantchat"
+              <button onClick={async () => {
+                if (!user) return;
+
+                const consultationId = await createConsultation({
+                  userId: user.id,
+                  userName: user.fullName ?? "Anonymous",
+                  userEmail: user.primaryEmailAddress?.emailAddress ?? "",
+                  consultantId: consultant._id,
+                });
+
+                router.push(`/consultantchat/${consultationId}`);
+              }}
                 className="w-full sm:w-auto rounded-full bg-green-700 px-5 py-3 text-sm font-medium text-white transition hover:bg-green-800 cursor-pointer"
-                type="button"
               >
                 Start Consult
-              </Link>
-
+              </button>
             </div>
           ))}
         </div>
@@ -221,9 +215,9 @@ export default function ChatConsultant() {
             }
           `}
         >
-          {chatConsultants.map((consultant) => (
+          {consultants.map((consultant) => (
             <div
-              key={consultant.id}
+              key={consultant._id}
               className={`flex items-center justify-between gap-4 px-5 py-5 transition-colors ${
                 darkMode ? "hover:bg-[#2b2b2b]" : "hover:bg-gray-50"
               }`}
@@ -231,8 +225,8 @@ export default function ChatConsultant() {
               <div className="flex items-center gap-4">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200 text-base shadow-inner select-none">
                   <Image
-                    src={consultant.avatar}
-                    alt={consultant.name}
+                    src={consultant.imageUrl || "/default-avatar.png"}
+                    alt={consultant.fullName}
                     width={50}
                     height={50}
                   />
@@ -243,7 +237,7 @@ export default function ChatConsultant() {
                     darkMode ? "text-white" : "text-black"
                   }`}
                 >
-                  {consultant.name}
+                  {consultant.fullName}
                 </h4>
               </div>
 
@@ -252,7 +246,7 @@ export default function ChatConsultant() {
                   darkMode ? "text-neutral-400" : "text-black"
                 }`}
               >
-                {consultant.date}
+                {consultant.isOnline ? "Online" : "Offline"}
               </span>
             </div>
           ))}

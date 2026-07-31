@@ -84,7 +84,7 @@ export default function Navbar() {
   return (
     <header className="fixed top-0 left-0 w-full z-50 px-4 pt-4">
       <nav
-        className={`mx-auto max-w-[1120px] flex items-center justify-between bg-white rounded-xl px-6 transition-all duration-300 ${
+        className={`mx-auto max-w-280 flex items-center justify-between bg-white rounded-xl px-6 transition-all duration-300 ${
           scrolled
             ? "py-3 shadow-nav"
             : "py-4 shadow-[0_0_4px_0_rgba(0,0,0,0.1)]"
@@ -135,7 +135,7 @@ export default function Navbar() {
                 <MenuIcon />
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] p-6">
+            <SheetContent side="right" className="w-75 p-6">
               <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
               <div className="flex flex-col h-full">
                 {/* Sheet logo */}
