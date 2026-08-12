@@ -5,24 +5,18 @@ import { v } from "convex/values";
 export const createDocument = mutation({
   args: {
     title: v.string(),
-
     originalFileName: v.string(),
-
     uploadedBy: v.string(),
-
     storageProvider: v.literal("cloudinary"),
-
     storageId: v.string(),
-
     fileUrl: v.string(),
-
+    summary: v.optional(v.string()),
     verificationStatus: v.union(
       v.literal("pending"),
       v.literal("approved"),
       v.literal("rejected"),
       v.literal("outdated")
     ),
-
     ingestionStatus: v.union(
       v.literal("uploaded"),
       v.literal("processing"),
@@ -176,7 +170,6 @@ export const updateDocument = mutation({
 export const updateDocumentStatus = mutation({
   args: {
     id: v.id("documents"),
-
     ingestionStatus: v.union(
       v.literal("uploaded"),
       v.literal("processing"),
@@ -193,10 +186,37 @@ export const updateDocumentStatus = mutation({
   },
 });
 
+export const updateDocumentContent = mutation({
+  args: {
+    id: v.id("documents"),
+    content: v.string(),
+  },
+
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, {
+      content: args.content,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+export const updateDocumentSummary = mutation({
+  args: {
+    id: v.id("documents"),
+    summary: v.string(),
+  },
+
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.id, {
+      summary: args.summary,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
 export const updateVerificationStatus = mutation({
   args: {
     id: v.id("documents"),
-
     verificationStatus: v.union(
       v.literal("pending"),
       v.literal("approved"),

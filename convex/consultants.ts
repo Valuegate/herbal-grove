@@ -5,11 +5,12 @@ export const saveConsultant = mutation({
   args: {
     clerkId: v.string(),
     fullName: v.string(),
+    specialization: v.optional(v.string()),
     email: v.string(),
     phoneNumber: v.optional(v.string()),
     gender: v.optional(v.string()),
     dateOfBirth: v.optional(v.string()),
-    description: v.optional(v.string()),
+    bio: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
   },
 
@@ -68,5 +69,28 @@ export const getAllConsultants = query({
   args: {},
   handler: async (ctx) => {
     return await ctx.db.query("consultants").collect();
+  },
+});
+
+export const updateOnlineStatus = mutation({
+  args: {
+    clerkId: v.string(),
+    isOnline: v.boolean(),
+  },
+
+  handler: async (ctx, args) => {
+    const consultant = await ctx.db
+      .query("consultants")
+      .withIndex("by_clerkId", (q) =>
+        q.eq("clerkId", args.clerkId)
+      )
+      .unique();
+
+    if (!consultant) return;
+
+    await ctx.db.patch(consultant._id, {
+      isOnline: args.isOnline,
+      updatedAt: Date.now(),
+    });
   },
 });

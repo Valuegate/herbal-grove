@@ -9,6 +9,7 @@
  */
 
 import type * as ai_model from "../ai_model.js";
+import type * as certificates from "../certificates.js";
 import type * as chunk from "../chunk.js";
 import type * as consultants from "../consultants.js";
 import type * as consultationMessages from "../consultationMessages.js";
@@ -20,6 +21,7 @@ import type * as documents from "../documents.js";
 import type * as herbs from "../herbs.js";
 import type * as messages from "../messages.js";
 import type * as research from "../research.js";
+import type * as saveDocuments from "../saveDocuments.js";
 
 import type {
   ApiFromModules,
@@ -29,6 +31,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   ai_model: typeof ai_model;
+  certificates: typeof certificates;
   chunk: typeof chunk;
   consultants: typeof consultants;
   consultationMessages: typeof consultationMessages;
@@ -40,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   herbs: typeof herbs;
   messages: typeof messages;
   research: typeof research;
+  saveDocuments: typeof saveDocuments;
 }>;
 
 /**

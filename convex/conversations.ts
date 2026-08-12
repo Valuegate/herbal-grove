@@ -42,6 +42,20 @@ export const getConversations = query({
   
 })
 
+export const getRecentConversations = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
+    return ctx.db
+      .query("conversations")
+      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
+      .order("desc")
+      .take(args.limit ?? 2);
+  },
+});
+
 export const updateConversation = mutation({
   args: {
     conversationId: v.id("conversations"),

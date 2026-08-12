@@ -39,34 +39,6 @@ export const LoginForm = () => {
     }
   };
 
-  // const onSubmit: SubmitHandler<FormFields> = async (data) => {
-  //   if (fetchStatus === "fetching") return;
-  //   setApiError(null);
-
-  //   const { error } = await signIn.create({
-  //     identifier: data.email,
-  //     password: data.password,
-  //   });
-
-  //   if (error) {
-  //     setApiError(getSignInErrorMessage(error));
-  //     return;
-  //   }
-
-  //   if (signIn.status === "complete") {
-  //     const { error: finalizeError } = await signIn.finalize();
-  //     if (finalizeError) {
-  //       setApiError(finalizeError.longMessage || finalizeError.message || "Unable to finish sign in.");
-  //       return;
-  //     }
-  //     router.push('/redirect');
-  //     return;
-  //   }
-
-  //   setApiError("Sign in did not complete. Please try again.");
-  // };
-
-
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
   if (fetchStatus === "fetching") return;
 

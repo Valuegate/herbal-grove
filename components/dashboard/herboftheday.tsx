@@ -1,127 +1,120 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import Link from "next/link"
-import { BookmarkIcon } from "@/components/ui/icons"
-import { FlowerIcon } from "@/components/ui/icons"
-import FlowerImage from "@/components/dashboard/morter.png"
-import { MessageCircle } from "lucide-react"
+import Image from "next/image";
+import Link from "next/link";
+import { useQuery } from "convex/react";
+import { MessageCircle } from "lucide-react";
 
-export const herbs = [
-  {
-    name: "Holy Basil (Tulsi)",
-    details: "Known as the \"Queen of Herbs,\" Holy Basil is a powerful adaptogen that helps the body cope with stress and promotes mental clarity.",
-    image: FlowerImage
-  },
-  {
-    name: "Chamomile",
-    details: "Valued for its calming and soothing properties, Chamomile is widely used to promote restful sleep, support healthy digestion, and ease tension.",
-    image: "Chamomile Illustration"
-  },
-  {
-    name: "Ashwagandha",
-    details: "A foundational herb in Ayurveda, Ashwagandha is celebrated for its ability to enhance vitality, support thyroid health, and build stamina.",
-    image: "Ashwagandha Illustration"
+import { api } from "@/convex/_generated/api";
+import { BookmarkIcon, FlowerIcon } from "@/components/ui/icons";
+import FlowerImage from "@/components/dashboard/morter.png";
+
+import { useUIStateContext } from "@/components/UIStateContext";
+
+export default function HerbOfTheDay() {
+  const { darkMode } = useUIStateContext();
+  const herb = useQuery(api.herbs.getHerbOfTheDay);
+  const document = useQuery(api.documentHerbs.getDocumentsForHerb, herb ? { herbId: herb._id } : "skip");
+  const firstDocument = document && document.length > 0 ? document[0] : null 
+
+  const headingClass = darkMode ? "text-white" : "text-gray-900";
+  const mutedClass = darkMode ? "text-neutral-400" : "text-gray-600";
+  const cardClass = `rounded-2xl border p-6 transition-all duration-300 ${
+    darkMode ? "bg-[#222224] border-neutral-800" : "bg-white border-gray-100 shadow-sm"
+  }`;
+
+  if (herb === undefined) {
+    return (
+      <section className="max-w-3xl mx-auto">
+        <div className={`rounded-2xl h-48 animate-pulse ${darkMode ? "bg-[#222224]" : "bg-gray-100"}`} />
+      </section>
+    );
   }
-]
 
-interface HerbCardProps {
-  darkMode: boolean,
-  herbIndex?: number
-}
-
-export default function HerbOfTheDay({ darkMode, herbIndex = 0 }: HerbCardProps) {
-  //Access one of the herbs in the array
-  const activeHerb = herbs[herbIndex] || herbs[0];
+  if (herb === null) {
+    return (
+      <section className="max-w-3xl mx-auto">
+        <div className={`${cardClass} text-center`}>
+          <h2 className={`text-xl font-bold ${headingClass}`}>Herb of the Day</h2>
+          <p className={`mt-2 ${mutedClass}`}>No verified herbs are available yet.</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
-    <section className="relative">
-      <div className={`
-        rounded-3xl p-6 md:p-7 pt-20 md:pt-20 flex flex-col md:flex-row gap-6 md:gap-8 items-center justify-between relative overflow-hidden transition-all duration-300 
-        ${darkMode
-        ? 'bg-[#222224]'
-          : 'bg-white border-gray-100 shadow-[0_8px_30px_rgba(0,0,0,0.4)] shadow-black-500/10'
-        }
-      `}>
-        {/*Herb Details*/}
-        <div className="absolute top-6 inset-x-6 flex justify-center z-20">
-          <div className="inline-flex items-center gap-2 px-4 py-3 rounded-full text-base font-bold text-[#001900] bg-[#c9ffc9] dark:bg-[#c9ffc9] dark:text-[#001900]">
-            <FlowerIcon />
-            <span>Herb of the Day</span>
+    <section className="max-w-3xl mx-auto">
+      <div className={`${cardClass} flex items-center justify-between gap-3`}>
+        {/* Herb Details */}
+        <div className="flex-1 space-y-3">
+          <div className="flex justify-center">
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+                darkMode ? "bg-green-500/10 text-green-400" : "bg-green-100 text-green-700"
+              }`}
+            >
+              <FlowerIcon />
+              Herb of the Day
+            </span>
           </div>
-        </div>
 
-        <div className="flex-1 space-y-4 w-full relative z-10">
-          {/*Title*/}
-          <h3 className={`text-2xl md:text-3xl font-extrabold tracking-normal ${darkMode ? 'text-white' : 'text-[#031609]'}`}>
-            {activeHerb.name}
+          <h3 className={`text-2xl font-bold ${headingClass}`}>
+            {herb.commonNames[0] ?? herb.scientificName}
           </h3>
 
-          {/*Description*/}
-          <p className={`text-sm md:text-base leading-relaxed max-w-xl ${darkMode ? 'text-neutral-300' : 'text-gray-600'}`}>
-            {activeHerb.details}
+          <p className={`text-sm leading-relaxed max-w-md ${mutedClass}`}>
+            {herb.description ?? "No description available yet."}
           </p>
 
-          {/*Actions*/}
-          <div className="flex flex-wrap items-center gap-4 pt-2">
-            <Link href="#" className={`flex items-center text-sm font-bold group transition duration-150 hover:underline ${darkMode ? 'text-[#c9ffc9]' : 'text-[#001900]'}`}>
-                <span>Read Research</span>
-                <svg className="w-4 h-4 ml-1 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-            </Link>
-
-            <Link href="#" className={`flex items-center text-sm font-bold px-4 py-2 rounded-full border transition duration-150 ${
-                darkMode 
-                  ? 'border-neutral-700 hover:bg-neutral-800 text-neutral-300' 
-                  : 'border-gray-200 hover:bg-gray-50 text-gray-600'
-              }`}>
-                <BookmarkIcon />
-                <span>Save</span>
-            </Link>
-          </div>
-        </div>
-
-        {/*Herb Image*/}
-        <div className="w-full md:w-60 lg:w-64 shrink-0 flex justify-center z-10">
-          <div className={`
-            w-56 h-56 md:w-60 md:h-60 lg:w-64 lg:h-64 
-            flex flex-col items-center justify-center p-6 text-center select-none transition-all duration-300 relative group overflow-hidden
-            ${darkMode 
-              ? 'bg-[#222224]' 
-              : 'bg-[#181818]'
-            }
-          `}>
-            <div className="w-full md:w-60 lg:w-64 shrink-0 flex justify-center z-10">
-              {typeof activeHerb.image === "string" ? (
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="flex flex-col items-center gap-2">
-                    <FlowerIcon />
-                    <span className="text-sm text-gray-500">Image unavailable</span>
-                  </div>
-                </div>
-              ) : (
-                <Image
-                  src={activeHerb.image}
-                  width={200}
-                  height={200}
-                  alt={activeHerb.name}
-                />
-              )}
-              </div>
-          </div>
-        </div>
-        <div className="fixed bottom-6 right-6 z-40 flex flex-col items-center gap-1 group">
-          <Link href="/chat" 
-            className="w-14 h-14 rounded-full bg-emerald-700/20 hover:bg-emerald-400 text-white flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200"
-            aria-label="Chat with AI"
+          <div className="flex items-center gap-6 pt-1">
+            <Link
+              href={firstDocument ? `/researchlibrary/${firstDocument._id}` : "#"}
+              className={`flex items-center gap-1.5 text-sm font-semibold group hover:underline ${headingClass}`}
             >
-              <MessageCircle />
-          </Link>
+              Read Research
+              <svg
+                className="w-4 h-4 group-hover:translate-x-1 transition-transform"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </Link>
 
-          <span className={`text-[10px] font-bold tracking-wider uppercase select-none opacity-90 transition-opacity ${darkMode ? 'text-emerald-400' : 'text-[#2b7a2d]'}`}>Chat with AI</span>
+            <button className={`flex items-center gap-1.5 text-sm font-semibold ${mutedClass} hover:text-green-600`}>
+              <BookmarkIcon />
+              Save
+            </button>
+          </div>
+        </div>
+
+        {/* Herb Image */}
+        <div className="hidden sm:block w-32 h-32 shrink-0 overflow-hidden rounded-xl bg-[#181818]">
+          <Image
+            src={herb.imageUrl ?? FlowerImage}
+            alt={herb.commonNames[0]}
+            width={128}
+            height={128}
+            className="w-full h-full object-cover"
+          />
         </div>
       </div>
+
+      {/* Floating Chat Button */}
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-center gap-1">
+        <Link
+          href="/dashboard/chat"
+          className="w-14 h-14 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white flex items-center justify-center shadow-lg transition"
+          aria-label="Chat with AI"
+        >
+          <MessageCircle />
+        </Link>
+        <span className={`text-[10px] font-bold uppercase ${darkMode ? "text-emerald-400" : "text-[#2b7a2d]"}`}>
+          Chat with AI
+        </span>
+      </div>
     </section>
-  )
+  );
 }

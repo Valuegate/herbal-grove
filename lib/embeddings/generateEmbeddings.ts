@@ -1,5 +1,3 @@
-import "server-only";
-
 import { ai } from "./client";
 
 export async function generateEmbedding(

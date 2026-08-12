@@ -49,7 +49,7 @@ export default function ChangePasswordForm() {
       newPassword: data.password,
     });
 
-    await fetch("/api/consultant/password-changed", {
+    await fetch("/api/consultant/changepassword", {
       method: "POST",
     });
 

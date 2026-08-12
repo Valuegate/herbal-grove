@@ -29,7 +29,7 @@ export default function RedirectPage() {
 
     // Force consultants to change password first
     if (role === "consultant" && mustChangePassword) {
-      router.replace("/consultant/change-password");
+      router.replace("/change-password");
       return;
     }
 

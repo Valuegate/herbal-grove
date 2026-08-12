@@ -4,27 +4,15 @@ import { usePathname } from "next/navigation";
 
 import Sidebar from "@/components/dashboard/sidebar";
 import { useUIStateContext } from "@/components/UIStateContext";
-import { NotificationIcon, ProfileIcon, ModeChangeIcon, MenuIcon
-} from "@/components/ui/icons";
+import { NotificationIcon, ProfileIcon, ModeChangeIcon, MenuIcon } from "@/components/ui/icons";
 
-import { USER_PAGE_TITLES } from "@/lib/constants";
-
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const {
-    darkMode,
-    toggleDarkMode,
-    sidebarOpen,
-    openSidebar,
-    closeSidebar,
-  } = useUIStateContext();
-
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { darkMode, toggleDarkMode, sidebarOpen, openSidebar, closeSidebar } = useUIStateContext();
   const pathname = usePathname();
 
-  const pageTitle = USER_PAGE_TITLES[pathname] ?? "Dashboard";
+  // Chat should go full-bleed (no padding/max-width/centering) unlike other pages.
+  // Adjust "/chat" to match your actual chat route if it differs.
+  const isFullBleed = pathname?.startsWith("/chat");
 
   const toggleSidebar = () => {
     if (sidebarOpen) {
@@ -40,18 +28,12 @@ export default function DashboardLayout({
         darkMode ? "bg-[#121212] text-[#e0e0e0]" : "bg-[#FAFAFA] text-[#333333]"
       }`}
     >
-      <Sidebar
-        isOpen={sidebarOpen}
-        onClose={closeSidebar}
-        darkMode={darkMode}
-      />
+      <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 
-      <div className="flex-1 flex flex-col h-screen overflow-y-auto">
+      <div className={`flex-1 flex flex-col h-screen ${isFullBleed ? "overflow-hidden" : "overflow-y-auto"}`}>
         <header
           className={`sticky top-0 z-30 shrink-0 px-6 py-4 flex items-center justify-between border-b backdrop-blur-md ${
-            darkMode
-              ? "bg-[#1e1e1e]/80 border-neutral-800"
-              : "bg-[#FAFAFA]/80 border-gray-100"
+            darkMode ? "bg-[#1e1e1e]/80 border-neutral-800" : "bg-[#FAFAFA]/80 border-gray-100"
           }`}
         >
           <div className="flex items-center">
@@ -71,11 +53,9 @@ export default function DashboardLayout({
               className={`text-base font-bold uppercase tracking-wider ${
                 darkMode ? "text-white" : "text-[#2b7a2d]"
               }`}
-            >
-            
-            </h1>
+            />
           </div>
-          
+
           <div className="flex items-center gap-3">
             <button
               className={`p-2.5 rounded-full shadow-sm hover:scale-105 active:scale-95 transition-all duration-150 ${
@@ -110,7 +90,13 @@ export default function DashboardLayout({
           </div>
         </header>
 
-        <main className="flex-1 p-6 md:p-8 max-w-5xl w-full mx-auto space-y-8">
+        <main
+          className={
+            isFullBleed
+              ? "flex-1 flex flex-col min-h-0 px-3"
+              : "flex-1 p-6 md:p-8 max-w-5xl w-full mx-auto space-y-8"
+          }
+        >
           {children}
         </main>
       </div>

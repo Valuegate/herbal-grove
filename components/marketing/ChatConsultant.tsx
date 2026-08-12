@@ -156,7 +156,7 @@ export default function ChatConsultant() {
                       darkMode ? "text-neutral-300" : "text-neutral-700"
                     }`}
                   >
-                    {consultant.description?.slice(0,80)}
+                    {consultant.bio?.slice(0,80)}
                     <span className="font-semibold text-green-700">
                       * {consultant.isOnline ? "Online" : "Offline"}
                     </span>

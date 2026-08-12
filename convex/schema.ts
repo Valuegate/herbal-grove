@@ -18,6 +18,22 @@ export default defineSchema({
     ),
     content: v.string(),
     createdAt: v.number(),
+    source: v.optional(
+      v.union(
+        v.literal("rag"),
+        v.literal("llm")
+      )
+    ),
+    references: v.optional(
+      v.array(
+        v.object({
+          text: v.string(),
+          similarity: v.float64(),
+          documentId: v.id("documents"),
+          page: v.optional(v.number()),
+        })
+      )
+    ),
   }).index("by_conversation", ["conversationId"]),
 
   // Herbs
@@ -59,6 +75,7 @@ export default defineSchema({
   // Uploaded Documents
   documents: defineTable({
     title: v.string(),
+    content: v.optional(v.string()),
     originalFileName: v.string(),
     uploadedBy: v.string(), // Clerk userId
     storageProvider: v.literal("cloudinary"),
@@ -76,6 +93,7 @@ export default defineSchema({
       v.literal("indexed"),
       v.literal("failed")
     ),
+    summary: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -98,17 +116,28 @@ export default defineSchema({
     ]),
 
   // Document and Source
-documentSources: defineTable({
-  documentId: v.id("documents"),
-  sourceId: v.id("sources"),
-  createdAt: v.number(),
+  documentSources: defineTable({
+    documentId: v.id("documents"),
+    sourceId: v.id("sources"),
+    createdAt: v.number(),
+    })
+    .index("by_document", ["documentId"])
+    .index("by_source", ["sourceId"])
+    .index("by_document_and_source", [
+      "documentId",
+      "sourceId",
+    ]),
+
+  //Save Documents
+  saveDocuments: defineTable({
+    userId: v.string(),
+    documentId: v.id("documents"),
+    createdAt: v.number(),
   })
-  .index("by_document", ["documentId"])
-  .index("by_source", ["sourceId"])
-  .index("by_document_and_source", [
-    "documentId",
-    "sourceId",
-  ]),
+    .index("by_user", ["userId"])
+    .index("by_document", ["documentId"])
+    .index("by_user_and_document", ["userId", "documentId"]),
+
   // Text Chunks and Embeddings
   chunks: defineTable({
     documentId: v.id("documents"),
@@ -125,20 +154,23 @@ documentSources: defineTable({
     ),
   }).index("by_document", ["documentId"]),
 
+  //Consultants
   consultants: defineTable({
     clerkId: v.string(),
     fullName: v.string(),
+    specialization: v.optional(v.string()),
     email: v.string(),
     phoneNumber: v.optional(v.string()),
     gender: v.optional(v.string()),
     dateOfBirth: v.optional(v.string()),
-    description: v.optional(v.string()),
+    bio: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
     isOnline: v.boolean(),
   }).index("by_clerkId", ["clerkId"]),
 
+  // Consultations
   consultations: defineTable({
     userId: v.string(),
     userName: v.string(),
@@ -155,6 +187,7 @@ documentSources: defineTable({
   .index("by_consultant", ["consultantId"])
   .index("by_user_consultant", ["userId", "consultantId"]),
 
+  // Consultation Messages
   consultationMessages: defineTable({
     consultationId: v.id("consultations"),
     sender: v.union(
@@ -165,5 +198,15 @@ documentSources: defineTable({
     createdAt: v.number(),
   })
   .index("by_consultation", ["consultationId"]),
+
+  // Consultants Certificates
+  certificates: defineTable({
+    consultantId: v.id("consultants"),
+    title: v.string(),
+    institution: v.string(),
+    awardedDate: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_consultant", ["consultantId"]),
 });
 

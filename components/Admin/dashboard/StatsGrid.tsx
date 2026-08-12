@@ -10,14 +10,10 @@ import {
   Database,
   Clock3,
 } from "lucide-react";
+import { useUIStateContext } from "@/components/UIStateContext";
 
-interface Props {
-  darkMode: boolean;
-}
-
-export default function StatsGrid({
-  darkMode,
-}: Props) {
+export default function StatsGrid() {
+  const { darkMode } = useUIStateContext();
   const stats = useQuery(api.dashboard.getDashboardStats);
   console.log("Dashboard stats:", stats);
 
@@ -44,21 +40,18 @@ export default function StatsGrid({
         title="Documents"
         value={stats.totalDocuments}
         icon={<FileText size={24} />}
-        darkMode={darkMode}
       />
 
       <StatCard
         title="Herbs"
         value={stats.totalHerbs}
         icon={<Leaf size={24} />}
-        darkMode={darkMode}
       />
 
       <StatCard
         title="Pending"
         value={stats.pendingDocuments}
         icon={<Clock3 size={24} />}
-        darkMode={darkMode}
       />
     </div>
   );

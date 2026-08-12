@@ -69,7 +69,6 @@ export default function ConsultationQueue({ tab }: Props) {
       {filteredConsultations.map((consultation) => (
         <ConsultationCard
           key={consultation._id}
-          darkMode={darkMode}
           consultation={consultation}
         />
       ))}

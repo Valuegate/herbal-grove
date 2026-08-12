@@ -2,14 +2,10 @@
 
 import Link from "next/link";
 import { FilePlus2, Leaf } from "lucide-react";
+import { useUIStateContext } from "@/components/UIStateContext";
 
-interface Props {
-  darkMode: boolean;
-}
-
-export default function QuickActions({
-  darkMode,
-}: Props) {
+export default function QuickActions() {
+  const { darkMode } = useUIStateContext();
   return (
     <div className="grid gap-6 md:grid-cols-2">
       <Link

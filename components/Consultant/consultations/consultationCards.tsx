@@ -6,8 +6,8 @@ import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 
+import { useUIStateContext } from "@/components/UIStateContext";
 interface ConsultationCardProps {
-  darkMode: boolean;
   consultation: {
     _id: Id<"consultations">;
     userName: string;
@@ -21,7 +21,8 @@ interface ConsultationCardProps {
   };
 }
 
-export default function ConsultationCard({ darkMode, consultation }: ConsultationCardProps) {
+export default function ConsultationCard({ consultation }: ConsultationCardProps) {
+  const { darkMode } = useUIStateContext();
   const router = useRouter();
 
   const acceptConsultation = useMutation(api.consultations.acceptConsultation);

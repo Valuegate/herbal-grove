@@ -15,9 +15,7 @@ interface Props {
   };
 
   user: {
-    name: string;
-    email: string;
-  };
+    name: string;  };
 }
 
 export default function Header({ consultation, user }: Props) {
@@ -56,10 +54,6 @@ export default function Header({ consultation, user }: Props) {
           >
             {user.name}
           </h2>
-
-          <p className="text-xs text-green-600">
-            {user.email}
-          </p>
         </div>
       </div>
 

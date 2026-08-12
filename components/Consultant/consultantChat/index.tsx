@@ -63,7 +63,6 @@ export default function ChatUsers({
         consultation={consultation}
         user={{
           name: data.consultation.userName,
-          email: data.consultation.userEmail
         }} />
 
       <Messages consultationId={consultation._id} />

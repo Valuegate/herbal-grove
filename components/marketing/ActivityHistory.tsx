@@ -70,9 +70,9 @@ export default function ActivityHistory() {
       </div>
 
       {activeTab === 'posts' ? (
-        <SavedPosts darkMode={darkMode} searchQuery={searchQuery} />
+        <SavedPosts searchQuery={searchQuery} />
       ) : (
-        <AIChatHistory darkMode={darkMode} searchQuery={searchQuery} />
+        <AIChatHistory searchQuery={searchQuery} />
       )}
     </div>
   )

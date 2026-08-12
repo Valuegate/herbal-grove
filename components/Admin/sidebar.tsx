@@ -14,17 +14,17 @@ import {
   ProfileIcon
 } from "@/components/ui/icons";
 
+import { useUIStateContext } from "@/components/UIStateContext";
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
-  darkMode: boolean;
 }
 
 export default function Sidebar({
   isOpen,
   onClose,
-  darkMode,
 }: SidebarProps) {
+  const { darkMode } = useUIStateContext();
   const { signOut } = useClerk();
   const pathname = usePathname();
 

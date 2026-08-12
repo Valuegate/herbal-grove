@@ -87,9 +87,9 @@ export default function Dashboard() {
         )}
       </div>
 
-      <HerbOfTheDay darkMode={darkMode} />
+      <HerbOfTheDay />
 
-      <ActivityHistoryCard darkMode={darkMode} />
+      <ActivityHistoryCard />
     </>
   );
 }

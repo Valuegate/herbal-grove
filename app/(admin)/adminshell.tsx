@@ -26,7 +26,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className={`min-h-screen font-sans flex transition-colors duration-300 ${darkMode ? "bg-[#121212] text-[#e0e0e0]" : "bg-[#FAFAFA] text-[#333333]"}`}>
-      <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} darkMode={darkMode} />
+      <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 
       <div className="flex-1 flex flex-col h-screen overflow-y-auto">
         <header

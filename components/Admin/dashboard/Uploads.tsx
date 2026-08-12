@@ -4,14 +4,10 @@ import { useQuery } from "convex/react";
 import { CheckCircle2, Clock3, XCircle } from "lucide-react";
 
 import { api } from "@/convex/_generated/api";
+import { useUIStateContext } from "@/components/UIStateContext";
 
-interface Props {
-  darkMode: boolean;
-}
-
-export default function Uploads({
-  darkMode,
-}: Props) {
+export default function Uploads() {
+  const { darkMode } = useUIStateContext();
   const uploads = useQuery(
     api.documents.getRecentDocuments,
     { limit: 3 }

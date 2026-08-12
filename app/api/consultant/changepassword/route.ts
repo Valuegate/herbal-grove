@@ -5,6 +5,8 @@ export async function POST() {
   try {
     const { userId } = await auth();
 
+    console.log("AUTH USER:", userId);
+
     if (!userId) {
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
@@ -16,12 +18,18 @@ export async function POST() {
 
     const user = await client.users.getUser(userId);
 
+    console.log("BEFORE:", user.publicMetadata);
+
     await client.users.updateUser(userId, {
       publicMetadata: {
         ...user.publicMetadata,
         mustChangePassword: false,
       },
     });
+
+    const updated = await client.users.getUser(userId);
+
+    console.log("AFTER:", updated.publicMetadata);
 
     return NextResponse.json({
       success: true,

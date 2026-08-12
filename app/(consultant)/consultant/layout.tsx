@@ -1,16 +1,12 @@
 "use client";
 
-import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 import ConsultantSidebar from "@/components/Consultant/sidebar";
 import { useUIStateContext } from "@/components/UIStateContext";
-import { NotificationIcon, ProfileIcon, ModeChangeIcon, MenuIcon,
-} from "@/components/ui/icons";
+import { NotificationIcon, ProfileIcon, ModeChangeIcon, MenuIcon } from "@/components/ui/icons";
 
-export default function ConsultantLayout({
-  children,
-}: {
+export default function ConsultantLayout({ children }: {
   children: ReactNode;
 }) {
   const {
@@ -21,20 +17,9 @@ export default function ConsultantLayout({
     closeSidebar,
   } = useUIStateContext();
 
-  const pathname = usePathname();
-
   const toggleSidebar = () => {
     sidebarOpen ? closeSidebar() : openSidebar();
   };
-
-  const pageTitle =
-    pathname === "/consultant/dashboard"
-      ? "Consultant Dashboard"
-      : pathname.startsWith("/consultant/consultations")
-      ? "Consultations"
-      : pathname.startsWith("/consultant/archive")
-      ? "Archive"
-      : "Consultant";
 
   return (
     <div
@@ -45,7 +30,6 @@ export default function ConsultantLayout({
       <ConsultantSidebar
         isOpen={sidebarOpen}
         onClose={closeSidebar}
-        darkMode={darkMode}
       />
 
       <div className="flex-1 flex flex-col h-screen overflow-y-auto">

@@ -163,7 +163,7 @@ export default function Navbar() {
                 {/* Sheet auth */}
                 <div className="flex flex-col gap-3 pt-6">
                   <Link
-                    href="/sign-in"
+                    href="/login"
                     onClick={() => setSheetOpen(false)}
                     className="text-center font-medium text-body-text text-base py-2 hover:text-brand-primary transition-colors"
                   >

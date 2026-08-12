@@ -8,26 +8,18 @@ import { useQuery } from "convex/react";
 
 import { api } from "@/convex/_generated/api";
 
-import Summary from "../Consultant/dashboard/ProfileSummary";
-import StatCards from "../Consultant/dashboard/StatCard";
-import Consultations from "../Consultant/dashboard/PendingConsultations";
-
-import { useUIStateContext } from "@/components/UIStateContext";
+import Summary from "./dashboard/ProfileHero";
+import ActiveConsultationCard from "./dashboard/ActiveConsultationCards";
+import ProfessionalBio from "../Consultant/dashboard/ProfessionalBio";
+import QualificationsCard from "../Consultant/dashboard/Qualifications";
 
 export default function Dashboard() {
-  const { darkMode } = useUIStateContext();
-
   const router = useRouter();
-
   const { user, isLoaded, isSignedIn } = useUser();
 
   const consultant = useQuery(
     api.consultants.getCurrentConsultant,
-    user
-      ? {
-          clerkId: user.id,
-        }
-      : "skip"
+    user ? { clerkId: user.id } : "skip"
   );
 
   useEffect(() => {
@@ -41,20 +33,10 @@ export default function Dashboard() {
     if (consultant === null) {
       router.replace("/consultant/profile");
     }
-  }, [
-    consultant,
-    isLoaded,
-    isSignedIn,
-    user,
-    router,
-  ]);
+  }, [consultant, isLoaded, isSignedIn, user, router]);
 
   if (!isLoaded || consultant === undefined) {
-    return (
-      <div className="flex h-[60vh] items-center justify-center">
-        Loading...
-      </div>
-    );
+    return <div className="flex h-[60vh] items-center justify-center">Loading...</div>;
   }
 
   if (consultant === null) {
@@ -63,25 +45,17 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1
-          className={`text-3xl font-bold ${darkMode ? "text-white" : "text-[#2b7a2d]"}`}
-        >
-          Consultant Dashboard
-        </h1>
-
-        <p
-          className={`mt-2 ${darkMode ? "text-neutral-400" : "text-gray-500"}`}
-        >
-          Welcome back. Here's what's happening today.
-        </p>
-      </div>
-
       <Summary />
+      <ActiveConsultationCard />
 
-      <StatCards />
-
-      <Consultations />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <ProfessionalBio />
+        </div>
+        <div className="lg:col-span-1">
+          <QualificationsCard />
+        </div>
+      </div>
     </div>
   );
 }

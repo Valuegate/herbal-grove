@@ -3,6 +3,7 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
+import { useUIStateContext } from "@/components/UIStateContext";
 
 
 const SparkleIcon = () => (
@@ -15,11 +16,11 @@ const SparkleIcon = () => (
 );
 
 interface AIChatHistoryProps {
-  darkMode: boolean;
   searchQuery: string;
 }
 
-export default function AIChatHistory ({ darkMode, searchQuery }: AIChatHistoryProps) {
+export default function AIChatHistory ({ searchQuery }: AIChatHistoryProps) {
+  const { darkMode } = useUIStateContext();
   const router = useRouter();
 
   const conversations = useQuery(

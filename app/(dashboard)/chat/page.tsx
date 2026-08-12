@@ -1,7 +1,5 @@
 import { Suspense } from "react";
-import Chatbox from "@/components/marketing/Chatbox";
-
-export const dynamic = "force-dynamic";
+import Chatbox from "@/components/chatbox/ChatBox";
 
 export default function ChatPage() {
   return (
