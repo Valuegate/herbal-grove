@@ -8,11 +8,11 @@ export default function UsersPage() {
 
         <div>
           <h1 className="text-3xl font-bold">
-            Users
+            Invite Consultants
           </h1>
 
           <p className="text-gray-500">
-            Invite consultants and researchers.
+            Invite consultants to join your team.
           </p>
         </div>
 

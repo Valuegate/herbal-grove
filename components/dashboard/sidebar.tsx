@@ -49,7 +49,7 @@ export default function Sidebar({
       icon: ChatBubbleIcon,
     },
     {
-      href: "/consultant",
+      href: "/consultants",
       label: "Chat Consultant",
       icon: ChatBubbleIcon,
     },
@@ -58,6 +58,11 @@ export default function Sidebar({
       label: "Research Library",
       icon: BookIcon,
     },
+    {
+      href: "/consultants/journal",
+      label: "Care Journal",
+      icon: BookIcon,
+    }
   ];
 
   const isActive = (href: string) => {

@@ -170,12 +170,48 @@ export default defineSchema({
     isOnline: v.boolean(),
   }).index("by_clerkId", ["clerkId"]),
 
+  // Consultant Availability
+  availableSlots: defineTable({
+    consultantId: v.id("consultants"),
+    startTime: v.number(),
+    endTime: v.number(),
+    status: v.union(
+      v.literal("available"),
+      v.literal("booked"),
+      v.literal("blocked")
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_consultant", ["consultantId"])
+    .index("by_consultant_and_start", [
+      "consultantId",
+      "startTime",
+    ]),
+
+  consultantAvailability: defineTable({
+    consultantId: v.id("consultants"),
+    dayOfWeek: v.number(), // 0 = Sunday, 1 = Monday ... 6 = Saturday
+    startTime: v.string(), // "09:00"
+    endTime: v.string(),   // "12:00"
+    isAvailable: v.boolean(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_consultant", ["consultantId"])
+    .index("by_consultant_day", [
+      "consultantId",
+      "dayOfWeek",
+    ]),
+
   // Consultations
   consultations: defineTable({
     userId: v.string(),
     userName: v.string(),
     userEmail: v.string(),
     consultantId: v.id("consultants"),
+    slotId: v.id("availableSlots"),
+    initialMessage: v.string(),
     status: v.union(
       v.literal("pending"),
       v.literal("active"),
@@ -185,6 +221,7 @@ export default defineSchema({
   })
   .index("by_user", ["userId"])
   .index("by_consultant", ["consultantId"])
+  .index("by_slot", ["slotId"])
   .index("by_user_consultant", ["userId", "consultantId"]),
 
   // Consultation Messages
@@ -208,5 +245,22 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_consultant", ["consultantId"]),
-});
 
+  careJournalNotes: defineTable({
+    userId: v.string(),
+    title: v.string(),
+    content: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"]),
+
+  careJournalDocuments: defineTable({
+    userId: v.string(),
+    title: v.string(),
+    fileUrl: v.string(),
+    storageProvider: v.string(),
+    mimeType: v.string(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_user", ["userId"])
+});

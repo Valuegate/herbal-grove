@@ -9,8 +9,11 @@
  */
 
 import type * as ai_model from "../ai_model.js";
+import type * as availableSlots from "../availableSlots.js";
+import type * as careJournal from "../careJournal.js";
 import type * as certificates from "../certificates.js";
 import type * as chunk from "../chunk.js";
+import type * as consultantAvailability from "../consultantAvailability.js";
 import type * as consultants from "../consultants.js";
 import type * as consultationMessages from "../consultationMessages.js";
 import type * as consultations from "../consultations.js";
@@ -31,8 +34,11 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   ai_model: typeof ai_model;
+  availableSlots: typeof availableSlots;
+  careJournal: typeof careJournal;
   certificates: typeof certificates;
   chunk: typeof chunk;
+  consultantAvailability: typeof consultantAvailability;
   consultants: typeof consultants;
   consultationMessages: typeof consultationMessages;
   consultations: typeof consultations;

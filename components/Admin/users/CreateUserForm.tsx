@@ -9,7 +9,6 @@ export default function UsersTable() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState("researcher");
   const [isCreating, setIsCreating] = useState(false);
   const [showCredentialsModal, setShowCredentialsModal] = useState(false);
   const [credentials, setCredentials] = useState({ email: "", password: "" });
@@ -36,7 +35,7 @@ export default function UsersTable() {
       const response = await fetch("/api/create-user", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, role }),
+        body: JSON.stringify({ name, email, role: "consultant" }),
       });
 
       const data = await response.json();
@@ -50,7 +49,6 @@ export default function UsersTable() {
       setShowCredentialsModal(true);
       setName("");
       setEmail("");
-      setRole("consultant");
     } catch (error) {
       console.error(error);
       alert("Something went wrong.");
@@ -86,14 +84,6 @@ export default function UsersTable() {
               onChange={(e) => setEmail(e.target.value)}
               className={inputClass}
             />
-          </div>
-
-          <div>
-            <label className={labelClass}>Role</label>
-            <select value={role} onChange={(e) => setRole(e.target.value)} className={inputClass}>
-              <option value="researcher">Researcher</option>
-              <option value="consultant">Consultant</option>
-            </select>
           </div>
 
           <button

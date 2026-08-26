@@ -8,7 +8,7 @@ export const USER_PAGE_TITLES: Record<string, string> = {
   "/": "Dashboard",
   "/chat": "Chatbox",
   "/history": "Activity History",
-  "/consultant": "Chat Consultant",
+  "/consultants": "Chat Consultant",
   "/researchlibrary": "Research Library",
 };
 

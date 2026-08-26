@@ -29,7 +29,7 @@ interface SidebarProps {
 const navItems = [
   { href: "/consultant/dashboard", label: "Profile", icon: DashboardIcon },
   { href: "/consultant/consultations", label: "Consultations", icon: ChatBubbleIcon },
-  { href: "/consultant/archive", label: "Archive", icon: BookIcon },
+  { href: "/consultant/availability", label: "Availability", icon: BookIcon },
 ];
 
 const iconBtnClass =
