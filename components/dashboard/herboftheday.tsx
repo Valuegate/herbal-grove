@@ -105,7 +105,7 @@ export default function HerbOfTheDay() {
       {/* Floating Chat Button */}
       <div className="fixed bottom-6 right-6 z-40 flex flex-col items-center gap-1">
         <Link
-          href="/dashboard/chat"
+          href="/chat"
           className="w-14 h-14 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white flex items-center justify-center shadow-lg transition"
           aria-label="Chat with AI"
         >

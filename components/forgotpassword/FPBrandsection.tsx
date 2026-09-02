@@ -44,12 +44,12 @@ export const ForgotPasswordBrandSection = () => {
         <h2 className="text-3xl font-extrabold text-black mb-3">
           Forgot Password?
         </h2>
-        <p className="text-gray-600 max-w-[280px] mx-auto leading-relaxed">
+        <p className="text-gray-600 max-w-70 mx-auto leading-relaxed">
           "No worries! Enter your email and we'll send you reset instructions to get back to your herbal journey"
         </p>
       </div>
 
-      <div className="mt-3 mb-3 flex justify-center w-full max-w-[220px]">
+      <div className="mt-3 mb-3 flex justify-center w-full max-w-55">
         <Image
           src={Padlock}
           alt="Locked Heart"

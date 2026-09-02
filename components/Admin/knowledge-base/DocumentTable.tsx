@@ -51,7 +51,7 @@ export default function DocumentTable({ search }: Props) {
       }`}
     >
       <div className="overflow-x-auto overflow-y-visible">
-        <table className="w-full min-w-[900px]">
+        <table className="w-full min-w-225">
           <thead
             className={`text-left ${
               darkMode

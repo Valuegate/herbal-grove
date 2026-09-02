@@ -1,22 +1,23 @@
 import { Readable } from "stream";
+
 import cloudinary from "./client";
 
-export interface UploadPdfResult {
+export interface UploadDocumentResult {
   publicId: string;
   secureUrl: string;
   originalFilename: string;
 }
 
-export async function uploadPdf(
+export async function uploadDocument(
   buffer: Buffer,
   fileName: string
-): Promise<UploadPdfResult> {
+): Promise<UploadDocumentResult> {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: "research-papers",
         resource_type: "raw",
-        public_id: fileName.replace(".pdf", ""),
+        public_id: fileName.replace(/\.[^/.]+$/, ""),
       },
       (error, result) => {
         if (error || !result) {

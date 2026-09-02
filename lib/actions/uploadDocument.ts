@@ -5,7 +5,7 @@ import { ConvexHttpClient } from "convex/browser";
 
 import { api } from "@/convex/_generated/api";
 
-import { uploadPdf } from "@/lib/cloudinary/uploadPdf";
+import { uploadDocument as uploadToCloudinary } from "@/lib/cloudinary/uploadDocuments";
 import { ingestDocument } from "@/lib/ingestion/ingestDocuments";
 
 const convex = new ConvexHttpClient(
@@ -27,7 +27,7 @@ export async function uploadDocument(
     );
 
     // Upload to Cloudinary
-    const uploaded = await uploadPdf(
+    const uploaded = await uploadToCloudinary(
       buffer,
       file.name
     );
@@ -37,7 +37,7 @@ export async function uploadDocument(
         api.documents.createDocument,
         {
           title: file.name.replace(
-            /\.pdf$/i,
+            /\.[^/.]+$/,
             ""
           ),
 

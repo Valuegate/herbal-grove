@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, Phone, MoreVertical } from "lucide-react";
+import { ChevronLeft, BookOpen, MoreVertical } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useUIStateContext } from "@/components/UIStateContext";
 import { useMutation } from "convex/react";
@@ -15,10 +15,12 @@ interface Props {
   };
 
   user: {
-    name: string;  };
+    name: string;
+  };
+  onOpenCareJournal?: () => void;
 }
 
-export default function Header({ consultation, user }: Props) {
+export default function Header({ consultation, user, onOpenCareJournal }: Props) {
   const router = useRouter();
   const { darkMode } = useUIStateContext();
 
@@ -67,9 +69,18 @@ export default function Header({ consultation, user }: Props) {
           </button>
         )}
 
-        <button>
-          <Phone size={20} />
-        </button>
+        {consultation.status === "active" && (
+          <button
+            type="button"
+            onClick={onOpenCareJournal}
+            className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition ${
+              darkMode ? "bg-green-950/40 text-green-400 hover:bg-green-950/60" : "bg-green-50 text-green-700 hover:bg-green-100"
+            }`}
+          >
+            <BookOpen size={20} />
+            Care Journal
+          </button>
+        )}
 
         <button>
           <MoreVertical size={20} />

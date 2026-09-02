@@ -138,3 +138,69 @@ export const completeConsultation = transitionConsultation(
   "completed",
   "Only an active consultation can be completed."
 );
+
+export const getConsultantUserNotes = query({
+  args: {
+    consultationId: v.id("consultations"),
+    consultantId: v.id("consultants"),
+  },
+
+  handler: async (ctx, args) => {
+    const consultation = await ctx.db.get(args.consultationId);
+
+    if (!consultation) {
+      throw new Error("Consultation not found.");
+    }
+
+    if (consultation.consultantId !== args.consultantId) {
+      throw new Error("You do not have access to this consultation.");
+    }
+
+    if (consultation.status !== "active") {
+      throw new Error(
+        "Care Journal access is only available during an active consultation."
+      );
+    }
+
+    return await ctx.db
+      .query("careJournalNotes")
+      .withIndex("by_user", (q) =>
+        q.eq("userId", consultation.userId)
+      )
+      .order("desc")
+      .collect();
+  },
+});
+
+export const getConsultantUserDocuments = query({
+  args: {
+    consultationId: v.id("consultations"),
+    consultantId: v.id("consultants"),
+  },
+
+  handler: async (ctx, args) => {
+    const consultation = await ctx.db.get(args.consultationId);
+
+    if (!consultation) {
+      throw new Error("Consultation not found.");
+    }
+
+    if (consultation.consultantId !== args.consultantId) {
+      throw new Error("You do not have access to this consultation.");
+    }
+
+    if (consultation.status !== "active") {
+      throw new Error(
+        "Care Journal access is only available during an active consultation."
+      );
+    }
+
+    return await ctx.db
+      .query("careJournalDocuments")
+      .withIndex("by_user", (q) =>
+        q.eq("userId", consultation.userId)
+      )
+      .order("desc")
+      .collect();
+  },
+});

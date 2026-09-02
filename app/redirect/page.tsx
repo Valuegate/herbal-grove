@@ -19,7 +19,6 @@ export default function RedirectPage() {
     const role = user.publicMetadata.role as
       | "admin"
       | "consultant"
-      | "researcher"
       | undefined;
 
     const mustChangePassword =
@@ -40,10 +39,6 @@ export default function RedirectPage() {
 
       case "consultant":
         router.replace("/consultant/dashboard");
-        break;
-
-      case "researcher":
-        router.replace("/researcher/dashboard");
         break;
 
       default:

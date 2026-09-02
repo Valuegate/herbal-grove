@@ -22,37 +22,31 @@ interface Props {
   darkMode: boolean;
 }
 
-export default function NotesSection({
-  notes,
-  userId,
-  darkMode,
-}: Props) {
+export default function NotesSection({ notes, userId, darkMode }: Props) {
   const [showModal, setShowModal] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
 
   const deleteNote = useMutation(api.careJournal.deleteNote);
 
   const cardClass = `rounded-2xl border ${
-    darkMode
-      ? "border-neutral-700 bg-[#222224]"
-      : "border-gray-200 bg-white shadow-sm"
+    darkMode ? "border-neutral-700 bg-[#222224]" : "border-gray-200 bg-white shadow-sm"
   }`;
+  const headingClass = darkMode ? "text-white" : "text-neutral-900";
+  const mutedClass = darkMode ? "text-neutral-400" : "text-gray-500";
 
-  const headingClass = darkMode
-    ? "text-white"
-    : "text-neutral-900";
+  function openModal(note: Note | null) {
+    setEditingNote(note);
+    setShowModal(true);
+  }
 
-  const mutedClass = darkMode
-    ? "text-neutral-400"
-    : "text-gray-500";
+  function closeModal() {
+    setShowModal(false);
+    setEditingNote(null);
+  }
 
   async function handleDelete(noteId: Id<"careJournalNotes">) {
     if (!window.confirm("Delete this note?")) return;
-
-    await deleteNote({
-      noteId,
-      userId,
-    });
+    await deleteNote({ noteId, userId });
   }
 
   return (
@@ -62,22 +56,14 @@ export default function NotesSection({
           <div>
             <div className="flex items-center gap-2">
               <FileText size={19} className="text-green-700" />
-
-              <h2 className={`font-bold ${headingClass}`}>
-                My Notes
-              </h2>
+              <h2 className={`font-bold ${headingClass}`}>My Notes</h2>
             </div>
-
-            <p className={`mt-1 text-sm ${mutedClass}`}>
-              Personal notes for future consultations.
-            </p>
+            <p className={`mt-1 text-sm ${mutedClass}`}>Personal notes for future consultations.</p>
           </div>
 
           <button
-            onClick={() => {
-              setEditingNote(null);
-              setShowModal(true);
-            }}
+            type="button"
+            onClick={() => openModal(null)}
             className="inline-flex items-center gap-2 rounded-xl bg-green-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-800"
           >
             <Plus size={16} />
@@ -87,44 +73,31 @@ export default function NotesSection({
 
         {notes.length === 0 ? (
           <div className="p-10 text-center">
-            <p className={`text-sm ${mutedClass}`}>
-              You haven't added any notes yet.
-            </p>
+            <p className={`text-sm ${mutedClass}`}>You haven't added any notes yet.</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200 dark:divide-neutral-700">
             {notes.map((note) => (
-              <div
-                key={note._id}
-                className="flex items-start justify-between gap-4 p-6"
-              >
+              <div key={note._id} className="flex items-start justify-between gap-4 p-6">
                 <div>
-                  <h3 className={`font-semibold ${headingClass}`}>
-                    {note.title}
-                  </h3>
-
-                  <p className={`mt-2 text-sm leading-6 ${mutedClass}`}>
-                    {note.content}
-                  </p>
-
+                  <h3 className={`font-semibold ${headingClass}`}>{note.title}</h3>
+                  <p className={`mt-2 text-sm leading-6 ${mutedClass}`}>{note.content}</p>
                   <p className="mt-3 text-xs text-gray-400">
-                    Updated{" "}
-                    {new Date(note.updatedAt).toLocaleDateString()}
+                    Updated {new Date(note.updatedAt).toLocaleDateString()}
                   </p>
                 </div>
 
                 <div className="flex gap-2">
                   <button
-                    onClick={() => {
-                      setEditingNote(note);
-                      setShowModal(true);
-                    }}
+                    type="button"
+                    onClick={() => openModal(note)}
                     className="rounded-lg p-2 text-gray-500 hover:bg-gray-100"
                   >
                     <Pencil size={17} />
                   </button>
 
                   <button
+                    type="button"
                     onClick={() => handleDelete(note._id)}
                     className="rounded-lg p-2 text-red-500 hover:bg-red-50"
                   >
@@ -137,17 +110,7 @@ export default function NotesSection({
         )}
       </section>
 
-      {showModal && (
-        <NoteModal
-          note={editingNote}
-          userId={userId}
-          darkMode={darkMode}
-          onClose={() => {
-            setShowModal(false);
-            setEditingNote(null);
-          }}
-        />
-      )}
+      {showModal && <NoteModal note={editingNote} userId={userId} darkMode={darkMode} onClose={closeModal} />}
     </>
   );
 }

@@ -19,12 +19,7 @@ interface Props {
   onClose: () => void;
 }
 
-export default function NoteModal({
-  note,
-  userId,
-  darkMode,
-  onClose,
-}: Props) {
+export default function NoteModal({ note, userId, darkMode, onClose }: Props) {
   const createNote = useMutation(api.careJournal.createNote);
   const updateNote = useMutation(api.careJournal.updateNote);
 
@@ -32,29 +27,21 @@ export default function NoteModal({
   const [content, setContent] = useState(note?.content ?? "");
   const [saving, setSaving] = useState(false);
 
-  async function handleSubmit(
-    event: React.FormEvent
-  ) {
-    event.preventDefault();
+  const inputClass = `w-full rounded-xl border px-4 py-3 outline-none focus:border-green-600 ${
+    darkMode ? "border-neutral-700 bg-[#181818] text-white" : "border-gray-200 bg-white text-gray-900"
+  }`;
 
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     if (!title.trim() || !content.trim()) return;
 
     try {
       setSaving(true);
 
       if (note) {
-        await updateNote({
-          noteId: note._id,
-          userId,
-          title,
-          content,
-        });
+        await updateNote({ noteId: note._id, userId, title, content });
       } else {
-        await createNote({
-          userId,
-          title,
-          content,
-        });
+        await createNote({ userId, title, content });
       }
 
       onClose();
@@ -63,29 +50,15 @@ export default function NoteModal({
     }
   }
 
-  const inputClass = `w-full rounded-xl border px-4 py-3 outline-none focus:border-green-600 ${
-    darkMode
-      ? "border-neutral-700 bg-[#181818] text-white"
-      : "border-gray-200 bg-white text-gray-900"
-  }`;
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div
-        className={`w-full max-w-lg rounded-2xl ${
-          darkMode ? "bg-[#222224]" : "bg-white"
-        }`}
-      >
+      <div className={`w-full max-w-lg rounded-2xl ${darkMode ? "bg-[#222224]" : "bg-white"}`}>
         <div className="flex items-center justify-between border-b p-6">
-          <h2
-            className={`text-xl font-bold ${
-              darkMode ? "text-white" : "text-neutral-900"
-            }`}
-          >
+          <h2 className={`text-xl font-bold ${darkMode ? "text-white" : "text-neutral-900"}`}>
             {note ? "Edit Note" : "Add Note"}
           </h2>
 
-          <button onClick={onClose}>
+          <button type="button" onClick={onClose}>
             <X size={20} />
           </button>
         </div>
@@ -116,14 +89,11 @@ export default function NoteModal({
             </button>
 
             <button
+              type="submit"
               disabled={saving}
               className="rounded-xl bg-green-700 px-6 py-3 text-sm font-semibold text-white"
             >
-              {saving
-                ? "Saving..."
-                : note
-                ? "Save Changes"
-                : "Add Note"}
+              {saving ? "Saving..." : note ? "Save Changes" : "Add Note"}
             </button>
           </div>
         </form>

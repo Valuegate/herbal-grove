@@ -2,10 +2,13 @@
 
 import { useUIStateContext } from "@/components/UIStateContext";
 import { useQuery } from "convex/react";
+import { useState } from "react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+
 import { CalendarDays, Clock3, CheckCircle2 } from "lucide-react";
 
+import ViewCareJournal from "../viewcarejournal/ViewCareJournal";
 import Header from "./Header";
 import Messages from "./Messages";
 import Input from "./ChatInput";
@@ -70,12 +73,15 @@ function StatusCard({
   );
 }
 
-export default function ChatUsers({ consultationId }: Props) {
+export default function ConsultantToUser({ consultationId }: Props) {
   const { darkMode } = useUIStateContext();
 
   const data = useQuery(api.consultations.getConsultation, {
     consultationId: consultationId as Id<"consultations">,
   });
+
+  // Move all hooks to the top, before any conditional returns
+  const [showCareJournal, setShowCareJournal] = useState(false);
 
   if (data === undefined) {
     return <CenteredMessage darkMode={darkMode}>Loading consultation...</CenteredMessage>;
@@ -90,7 +96,6 @@ export default function ChatUsers({ consultationId }: Props) {
   if (!consultant) {
     return <CenteredMessage darkMode={darkMode}>Consultant not found.</CenteredMessage>;
   }
-
   const mutedClass = darkMode ? "text-neutral-300" : "text-gray-600";
   const headingClass = darkMode ? "text-white" : "text-neutral-900";
 
@@ -165,19 +170,12 @@ export default function ChatUsers({ consultationId }: Props) {
   if (consultation.status === "completed") {
     return (
       <PageShell darkMode={darkMode}>
-        <Header consultation={consultation} user={{ name: consultation.userName }} />
+        <Header
+          consultation={consultation}
+          user={{ name: consultation.userName }}
+        />
 
-        <StatusCard
-          darkMode={darkMode}
-          iconBg="bg-gray-100"
-          iconColor="text-gray-500"
-          title="Consultation Completed"
-        >
-          <p className={`mt-3 text-sm leading-6 ${mutedClass}`}>
-            Your consultation with <strong>{consultant.fullName}</strong> has been completed.
-          </p>
-          <p className="mt-4 text-xs text-gray-500">Thank you for using HerbalMind AI.</p>
-        </StatusCard>
+        <Messages consultationId={consultation._id} />
       </PageShell>
     );
   }
@@ -185,7 +183,17 @@ export default function ChatUsers({ consultationId }: Props) {
   // ACTIVE — consultant has accepted; normal chat is available.
   return (
     <PageShell darkMode={darkMode}>
-      <Header consultation={consultation} user={{ name: consultation.userName }} />
+      <Header consultation={consultation} user={{ name: consultation.userName }} onOpenCareJournal={() => setShowCareJournal(true)} />
+
+      {showCareJournal && (
+        <ViewCareJournal
+          consultationId={consultation._id}
+          consultantId={consultant._id}
+          darkMode={darkMode}
+          onClose={() => setShowCareJournal(false)}
+        />
+      )}
+
       <Messages consultationId={consultation._id} />
       <Input consultationId={consultation._id} />
     </PageShell>

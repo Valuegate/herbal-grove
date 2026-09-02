@@ -1,8 +1,8 @@
-import ChatUsers from "@/components/Consultant/consultantChat";
+import ConsultantToUser from "@/components/Consultant/consultantChat/ConsultantToUser";
 
 interface Props {
   params: Promise<{
-    consultationId: string;
+  consultationId: string;
   }>;
 }
 
@@ -10,7 +10,7 @@ export default async function Page({ params }: Props) {
   const { consultationId } = await params;
 
   return (
-    <ChatUsers
+    <ConsultantToUser
       consultationId={consultationId}
     />
   );

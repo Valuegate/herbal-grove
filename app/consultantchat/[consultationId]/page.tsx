@@ -1,5 +1,4 @@
-import ConsultantChat from "@/components/userConsultantChat/index";
-
+import UserToConsultant from "@/components/userConsultantChat/UserToConsultant";
 
 export default async function Page({
   params,
@@ -11,7 +10,7 @@ export default async function Page({
   const { consultationId } = await params;
 
   return (
-    <ConsultantChat
+    <UserToConsultant
       consultationId={consultationId}
     />
   );

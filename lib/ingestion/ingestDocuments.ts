@@ -6,7 +6,7 @@ import { api } from "@/convex/_generated/api";
 
 import { downloadDocument } from "./downloadDocuments";
 import { generateSummary } from "./generateSummary";
-import { extractText } from "../pdf/extractText";
+import { extractDocumentText } from "./extractDocumentText"
 import { extractHerbs } from "./extractHerbs";
 import { cleanExtractedText } from "../pdf/formattedText";
 import { saveHerbs } from "./saveHerbs";
@@ -28,10 +28,10 @@ export async function ingestDocument(convex: ConvexHttpClient, documentId: Id<"d
     console.log(`📄 Processing ${document.title}`);
 
     console.log("download pdf");
-    const pdfBuffer = await downloadDocument(document.fileUrl);
+    const documentBuffer = await downloadDocument(document.fileUrl);
 
     console.log("extract pdf");
-    const rawText = await extractText(pdfBuffer);
+    const rawText = await extractDocumentText(documentBuffer, document.originalFileName);
 
     console.log("format text");
     const extractedText = cleanExtractedText(rawText);

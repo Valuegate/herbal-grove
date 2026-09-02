@@ -4,8 +4,8 @@ import { useState, useTransition } from "react";
 import { MoreVertical } from "lucide-react";
 
 import { Doc, Id } from "@/convex/_generated/dataModel";
-import { deleteDocument } from "@/app/actions/deleteDocuments";
-import { updateDocumentStatus } from "@/app/actions/updateDocumentStatus";
+import { deleteDocument } from "@/lib/actions/deleteDocuments";
+import { updateDocumentStatus } from "@/lib/actions/updateDocumentStatus";
 import ConfirmModal from "@/components/ui/confirmModal";
 
 interface Props {

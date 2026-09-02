@@ -23,9 +23,16 @@ export async function saveChunks(
   for (let i = 0; i < validChunks.length; i++) {
     console.log(`Embedding chunk ${i + 1}/${validChunks.length}`);
 
-    const embedding = await generateEmbedding(
-      validChunks[i]
-    );
+    const embedding = await generateEmbedding(validChunks[i]);
+    if (
+      !Array.isArray(embedding) ||
+      embedding.length === 0 ||
+      embedding.some((value) => !Number.isFinite(value))
+    ) {
+      throw new Error(
+        `Invalid embedding generated for chunk ${i + 1}`
+      );
+    }
 
     await convex.mutation(
       api.chunk.createChunk,

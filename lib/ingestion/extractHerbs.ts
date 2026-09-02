@@ -25,51 +25,96 @@ export type ExtractedHerb = z.infer<typeof HerbSchema>;
 export async function extractHerbs(
   text: string
 ): Promise<ExtractedHerb[]> {
-  const preview = text.slice(0, 25000);
+  const preview = text.slice(0, 16000);
 
   const completion = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
-    temperature: 0,
-    messages: [
-      {
-        role: "system",
-        content: `
+  model: "qwen/qwen3.8-27b",
+  temperature: 0,
+  messages: [
+    {
+      role: "system",
+      content: `
 You are an expert botanist and medicinal plant researcher.
 
-Your task is to identify every medicinal herb mentioned in the research paper.
+Identify every medicinal herb mentioned in the research paper.
 
-Return ONLY valid JSON.
-
-The response MUST be an array.
-
-Each herb MUST follow this schema:
-
-[
-  {
-    "scientificName": "",
-    "commonNames": [],
-    "aliases": [],
-    "family": "",
-    "genus": "",
-    "species": "",
-    "description": "",
-    "tags": []
-  }
-]
-
-Rules:
-- Return ONLY JSON.
-- Do NOT wrap the response in markdown.
-- Do NOT explain your answer.
-- If no herbs are found, return [].
-`,
+Only include herbs that are actually mentioned in the provided text.
+Do not invent herbs or information that is not supported by the text.
+If no herbs are found, return an empty array.
+      `,
+    },
+    {
+      role: "user",
+      content: preview,
+    },
+  ],
+  response_format: {
+  type: "json_schema",
+  json_schema: {
+    name: "herb_extraction",
+    strict: true,
+    schema: {
+      type: "object",
+      properties: {
+        herbs: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              scientificName: {
+                type: "string",
+              },
+              commonNames: {
+                type: "array",
+                items: {
+                  type: "string",
+                },
+              },
+              aliases: {
+                type: "array",
+                items: {
+                  type: "string",
+                },
+              },
+              family: {
+                type: "string",
+              },
+              genus: {
+                type: "string",
+              },
+              species: {
+                type: "string",
+              },
+              description: {
+                type: "string",
+              },
+              tags: {
+                type: "array",
+                items: {
+                  type: "string",
+                },
+              },
+            },
+            required: [
+              "scientificName",
+              "commonNames",
+              "aliases",
+              "family",
+              "genus",
+              "species",
+              "description",
+              "tags",
+            ],
+            additionalProperties: false,
+          },
+        },
       },
-      {
-        role: "user",
-        content: preview,
-      },
-    ],
-  });
+      required: ["herbs"],
+      additionalProperties: false,
+    },
+  },
+},
+});
 
   const content =
     completion.choices[0].message.content ?? "[]";
@@ -77,7 +122,7 @@ Rules:
   try {
     const parsed = JSON.parse(content);
 
-    return HerbsSchema.parse(parsed);
+    return HerbsSchema.parse(parsed.herbs);
   } catch (error) {
     console.error(
       "Failed to parse Groq response:",

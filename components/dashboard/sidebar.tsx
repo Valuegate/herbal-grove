@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useClerk } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
-
+import { NotebookPen, Bot, X } from "lucide-react";
 import {
   LeafLogo,
   XIcon,
@@ -46,7 +46,7 @@ export default function Sidebar({
     {
       href: "/chat",
       label: "Chat with AI",
-      icon: ChatBubbleIcon,
+      icon: Bot,
     },
     {
       href: "/consultants",
@@ -59,9 +59,9 @@ export default function Sidebar({
       icon: BookIcon,
     },
     {
-      href: "/consultants/journal",
+      href: "/journal",
       label: "Care Journal",
-      icon: BookIcon,
+      icon: NotebookPen,
     }
   ];
 
@@ -122,7 +122,7 @@ export default function Sidebar({
             onClick={onClose}
             className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-neutral-800 text-gray-400 hover:text-gray-600 transition"
           >
-            <XIcon />
+            <X />
           </button>
         </div>
 

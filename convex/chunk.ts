@@ -28,7 +28,7 @@ export const createChunks = mutation({
         page: v.optional(v.number()),
         chunkIndex: v.number(),
         text: v.string(),
-        embedding: v.array(v.float64()),
+        embedding: v.array(v.number()),
       })
     ),
   },

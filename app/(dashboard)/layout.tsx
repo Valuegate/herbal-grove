@@ -3,15 +3,14 @@
 import { usePathname } from "next/navigation";
 
 import Sidebar from "@/components/dashboard/sidebar";
+import BottomNav from "@/components/BottomNav";
+
 import { useUIStateContext } from "@/components/UIStateContext";
 import { NotificationIcon, ProfileIcon, ModeChangeIcon, MenuIcon } from "@/components/ui/icons";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { darkMode, toggleDarkMode, sidebarOpen, openSidebar, closeSidebar } = useUIStateContext();
   const pathname = usePathname();
-
-  // Chat should go full-bleed (no padding/max-width/centering) unlike other pages.
-  // Adjust "/chat" to match your actual chat route if it differs.
   const isFullBleed = pathname?.startsWith("/chat");
 
   const toggleSidebar = () => {
@@ -39,8 +38,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex items-center">
             <button
               onClick={toggleSidebar}
-              className={`lg:hidden p-2 rounded-lg transition ${
-                darkMode ? "hover:bg-neutral-800" : "hover:bg-gray-100"
+              className={`hidden md:block lg:hidden p-2 rounded-lg transition ${
+    darkMode ? "hover:bg-neutral-800" : "hover:bg-gray-100"
               }`}
               aria-label="Open Sidebar"
             >
@@ -93,13 +92,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <main
           className={
             isFullBleed
-              ? "flex-1 flex flex-col min-h-0 px-3"
-              : "flex-1 p-6 md:p-8 max-w-5xl w-full mx-auto space-y-8"
+              ? "flex-1 flex flex-col min-h-0 px-3 pb-20 md:pb-0"
+              : "flex-1 p-6 pb-24 md:p-8 md:pb-8 max-w-5xl w-full mx-auto space-y-8"
           }
         >
           {children}
         </main>
       </div>
+      <BottomNav />
     </div>
   );
 }

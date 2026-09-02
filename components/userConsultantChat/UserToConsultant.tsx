@@ -12,7 +12,7 @@ interface Props {
   consultationId: string;
 }
 
-export default function ConsultantChat({
+export default function UserToConsultant({
   consultationId,
 }: Props) {
   const { darkMode } = useUIStateContext();

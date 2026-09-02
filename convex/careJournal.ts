@@ -39,6 +39,42 @@ export const getUserNotes = query({
   },
 });
 
+// Get user's notes for an active consultation
+export const getConsultantUserNotes = query({
+  args: {
+    consultationId: v.id("consultations"),
+    consultantId: v.id("consultants"),
+  },
+
+  handler: async (ctx, args) => {
+    const consultation = await ctx.db.get(args.consultationId);
+
+    if (!consultation) {
+      throw new Error("Consultation not found.");
+    }
+
+    if (consultation.consultantId !== args.consultantId) {
+      throw new Error(
+        "You do not have access to this consultation."
+      );
+    }
+
+    if (consultation.status !== "active") {
+      throw new Error(
+        "Care Journal access is only available during an active consultation."
+      );
+    }
+
+    return await ctx.db
+      .query("careJournalNotes")
+      .withIndex("by_user", (q) =>
+        q.eq("userId", consultation.userId)
+      )
+      .order("desc")
+      .collect();
+  },
+});
+
 // Update an existing note
 export const updateNote = mutation({
   args: {
@@ -132,6 +168,42 @@ export const getUserDocuments = query({
       .query("careJournalDocuments")
       .withIndex("by_user", (q) =>
         q.eq("userId", args.userId)
+      )
+      .order("desc")
+      .collect();
+  },
+});
+
+// Get user's documents for an active consultation
+export const getConsultantUserDocuments = query({
+  args: {
+    consultationId: v.id("consultations"),
+    consultantId: v.id("consultants"),
+  },
+
+  handler: async (ctx, args) => {
+    const consultation = await ctx.db.get(args.consultationId);
+
+    if (!consultation) {
+      throw new Error("Consultation not found.");
+    }
+
+    if (consultation.consultantId !== args.consultantId) {
+      throw new Error(
+        "You do not have access to this consultation."
+      );
+    }
+
+    if (consultation.status !== "active") {
+      throw new Error(
+        "Care Journal access is only available during an active consultation."
+      );
+    }
+
+    return await ctx.db
+      .query("careJournalDocuments")
+      .withIndex("by_user", (q) =>
+        q.eq("userId", consultation.userId)
       )
       .order("desc")
       .collect();
