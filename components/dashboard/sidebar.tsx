@@ -62,6 +62,11 @@ export default function Sidebar({
       href: "/journal",
       label: "Care Journal",
       icon: NotebookPen,
+    },
+    {
+      href: "/identify",
+      label: "Identify AI",
+      icon: Bot,
     }
   ];
 

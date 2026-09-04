@@ -162,3 +162,26 @@ export const searchChunks = query({
       .slice(0, args.limit ?? 5);
   },
 });
+
+export const getApprovedChunks = query({
+  handler: async (ctx) => {
+    const chunks = await ctx.db
+      .query("chunks")
+      .collect();
+
+    const approvedChunks = [];
+
+    for (const chunk of chunks) {
+      const document = await ctx.db.get(chunk.documentId);
+
+      if (
+        document?.verificationStatus === "approved" &&
+        document?.ingestionStatus === "indexed"
+      ) {
+        approvedChunks.push(chunk);
+      }
+    }
+
+    return approvedChunks;
+  },
+});

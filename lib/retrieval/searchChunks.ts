@@ -6,7 +6,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { generateEmbedding } from "../embeddings/generateEmbeddings";
 import { cosineSimilarity } from "./cosineSimilarity";
 
-const DEFAULT_THRESHOLD = 0.8;
+const DEFAULT_THRESHOLD = 0.65;
 const DEFAULT_LIMIT = 5;
 
 type Chunk = {
@@ -31,9 +31,31 @@ export async function searchChunks(
 ): Promise<SearchChunkResult[]> {
   const queryEmbedding = await generateEmbedding(question);
 
-  const chunks = (await convex.query(
-    api.chunk.getChunks
-  )) as Chunk[];
+  const chunks = (await convex.query(api.chunk.getApprovedChunks)) as Chunk[];
+
+  console.log("RAG chunks found:", chunks.length);
+
+  // const rankedChunks: SearchChunkResult[] = chunks
+  //   .map((chunk: Chunk): SearchChunkResult => ({
+  //     text: chunk.text,
+  //     similarity: cosineSimilarity(
+  //       queryEmbedding,
+  //       chunk.embedding
+  //     ),
+  //     documentId: chunk.documentId,
+  //     page: chunk.page,
+  //   }))
+  //   .filter(
+  //     (chunk: SearchChunkResult) =>
+  //       chunk.similarity >= threshold
+  //   )
+  //   .sort(
+  //     (
+  //       a: SearchChunkResult,
+  //       b: SearchChunkResult
+  //     ) => b.similarity - a.similarity
+  //   )
+  //   .slice(0, limit);
 
   const rankedChunks: SearchChunkResult[] = chunks
     .map((chunk: Chunk): SearchChunkResult => ({
@@ -45,17 +67,26 @@ export async function searchChunks(
       documentId: chunk.documentId,
       page: chunk.page,
     }))
-    .filter(
-      (chunk: SearchChunkResult) =>
-        chunk.similarity >= threshold
-    )
     .sort(
       (
         a: SearchChunkResult,
         b: SearchChunkResult
       ) => b.similarity - a.similarity
+    );
+
+  console.log(
+    "Top RAG similarities:",
+    rankedChunks.slice(0, 10).map((chunk) => chunk.similarity)
+  );
+
+  const filteredChunks = rankedChunks
+    .filter(
+      (chunk: SearchChunkResult) =>
+        chunk.similarity >= threshold
     )
     .slice(0, limit);
+
+  return filteredChunks;
 
   return rankedChunks;
 }

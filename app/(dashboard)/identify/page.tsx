@@ -17,10 +17,18 @@ interface TopMatch extends PlantMatch {
   family: string | null;
 }
 
+interface HerbProfile {
+  description: string;
+  traditionalUses: string[];
+  potentialBenefits: string[];
+  safetyConsiderations: string[];
+}
+
 interface IdentificationResult {
   isPlant: boolean;
   topMatch: TopMatch | null;
   alternatives: PlantMatch[];
+  herbProfile: HerbProfile | null;
 }
 
 const cardClass = "rounded-2xl border border-gray-200 bg-white shadow-sm";
@@ -264,6 +272,93 @@ export default function IdentifyPage() {
                   <StatBox label="Family" value={result.topMatch.family || "Unknown"} />
                 </div>
 
+                {/* Herb Description */}
+                {result.herbProfile?.description && (
+                  <div className="mb-6">
+                    <p className="mb-2 text-sm font-semibold">About</p>
+
+                    <div className={statBoxClass}>
+                      <p className="text-sm leading-6 text-gray-600">
+                        {result.herbProfile.description}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Traditional Uses */}
+                {result.herbProfile && 
+                  result.herbProfile?.traditionalUses && 
+                  result.herbProfile?.traditionalUses.length > 0 && (
+                    <div className="mb-6">
+                      <p className="mb-3 text-sm font-semibold">Traditional Uses</p>
+
+                      <div className={statBoxClass}>
+                        <ul className="space-y-2">
+                          {result.herbProfile.traditionalUses.map((use, index) => (
+                            <li
+                              key={index}
+                              className="flex gap-2 text-sm leading-6 text-gray-600"
+                            >
+                              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#2B7A2D]" />
+                              <span>{use}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )
+                }
+
+                {/* Potential Benefits */}
+                {result.herbProfile &&
+                  result.herbProfile.potentialBenefits &&
+                  result.herbProfile.potentialBenefits.length > 0 && (
+                    <div className="mb-6">
+                      <p className="mb-3 text-sm font-semibold">Potential Benefits</p>
+
+                      <div className={statBoxClass}>
+                        <ul className="space-y-2">
+                          {result.herbProfile.potentialBenefits.map((benefit, index) => (
+                            <li
+                              key={index}
+                              className="flex gap-2 text-sm leading-6 text-gray-600"
+                            >
+                              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#2B7A2D]" />
+                              <span>{benefit}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )
+                }
+                
+                {/* Safety Considerations */}
+                {result.herbProfile &&
+                  result.herbProfile.safetyConsiderations &&
+                  result.herbProfile.safetyConsiderations.length > 0 && (
+                    <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                      <p className="mb-3 text-sm font-semibold text-amber-900">
+                        Safety Considerations
+                      </p>
+
+                      <ul className="space-y-2">
+                        {result.herbProfile.safetyConsiderations.map(
+                          (warning, index) => (
+                            <li
+                              key={index}
+                              className="flex gap-2 text-sm leading-6 text-amber-800"
+                            >
+                              <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-600" />
+                              <span>{warning}</span>
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    </div>
+                  )
+                }
+                
                 {/* Other possible matches */}
                 {result.alternatives.length > 0 && (
                   <div>

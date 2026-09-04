@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
+import { ConvexHttpClient } from "convex/browser";
+import { searchChunks, type SearchChunkResult } from "@/lib/retrieval/searchChunks";
+import { generateHerbProfile } from "@/lib/retrieval/generateHerbProfile"
 
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 function toPlantMatch(result: any) {
   return {
     commonName: result.species?.commonNames?.[0] ?? null,
@@ -46,6 +50,24 @@ export async function POST(request: Request) {
       const results = data.results ?? [];
       const topResult = results[0] ?? null;
 
+      let research: SearchChunkResult[] = [];
+      let herbProfile = null
+
+      if (topResult?.species?.scientificName) {
+        research = await searchChunks(
+          convex,
+          topResult.species.scientificName
+        );
+
+        if (research.length > 0) {
+          herbProfile = await generateHerbProfile(
+            topResult.species.scientificName,
+            topResult.species?.commonNames?.[0] ?? null,
+            research
+          )
+        }
+      }
+
       return NextResponse.json({
         isPlant: results.length > 0,
         topMatch: topResult
@@ -56,7 +78,7 @@ export async function POST(request: Request) {
               family: topResult.species?.family?.scientificName ?? null,
             }
           : null,
-        alternatives: results.slice(1).map(toPlantMatch),
+        alternatives: results.slice(1).map(toPlantMatch), research, herbProfile
       });
     } catch {
       return NextResponse.json(
