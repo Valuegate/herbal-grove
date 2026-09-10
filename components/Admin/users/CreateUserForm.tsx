@@ -2,16 +2,16 @@
 
 import { useState } from "react";
 import { useUIStateContext } from "@/components/UIStateContext";
-import CredentialsModal from "./CredentialsModal";
 
 export default function UsersTable() {
   const { darkMode } = useUIStateContext();
 
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [isCreating, setIsCreating] = useState(false);
-  const [showCredentialsModal, setShowCredentialsModal] = useState(false);
-  const [credentials, setCredentials] = useState({ email: "", password: "" });
+  const [isInviting, setIsInviting] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
 
   const inputClass = `w-full rounded-xl border px-4 py-3 outline-none transition ${
     darkMode
@@ -23,85 +23,85 @@ export default function UsersTable() {
     darkMode ? "text-neutral-300" : "text-gray-700"
   }`;
 
-  async function createUser() {
-    if (!name || !email) {
-      alert("Please fill in all fields.");
+  async function inviteConsultant() {
+    if (!email) {
+      setStatusMessage({ type: "error", text: "Please enter an email address." });
       return;
     }
 
     try {
-      setIsCreating(true);
+      setIsInviting(true);
+      setStatusMessage(null);
 
-      const response = await fetch("/api/create-user", {
+      const response = await fetch("/api/invite-consultant", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, role: "consultant" }),
+        body: JSON.stringify({ email, role: "consultant" }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.error ?? "Unable to create user.");
+        setStatusMessage({ type: "error", text: data.error ?? "Unable to send invitation." });
         return;
       }
 
-      setCredentials({ email, password: data.temporaryPassword });
-      setShowCredentialsModal(true);
-      setName("");
+      setStatusMessage({
+        type: "success",
+        text: `Invitation sent to ${email}. They'll set up their own account from the link.`,
+      });
       setEmail("");
     } catch (error) {
       console.error(error);
-      alert("Something went wrong.");
+      setStatusMessage({ type: "error", text: "Something went wrong." });
     } finally {
-      setIsCreating(false);
+      setIsInviting(false);
     }
   }
 
   return (
-    <>
-      <div
-        className={`rounded-2xl border p-6 transition-colors ${
-          darkMode ? "border-neutral-700 bg-neutral-900" : "border-gray-200 bg-white"
-        }`}
-      >
-        <div className="space-y-5">
-          <div>
-            <label className={labelClass}>Full Name</label>
-            <input
-              placeholder="John Doe"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className={inputClass}
-            />
-          </div>
-
-          <div>
-            <label className={labelClass}>Email Address</label>
-            <input
-              type="email"
-              placeholder="john@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={inputClass}
-            />
-          </div>
-
-          <button
-            onClick={createUser}
-            disabled={isCreating}
-            className="w-full rounded-xl bg-[#2b7a2d] py-3 font-semibold text-white transition hover:bg-[#256927] disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isCreating ? "Creating User..." : "Create User"}
-          </button>
+    <div
+      className={`rounded-2xl border p-6 transition-colors ${
+        darkMode ? "border-neutral-700 bg-neutral-900" : "border-gray-200 bg-white"
+      }`}
+    >
+      <div className="space-y-5">
+        <div>
+          <label className={labelClass}>Consultant Email Address</label>
+          <input
+            type="email"
+            placeholder="john@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={inputClass}
+          />
         </div>
-      </div>
 
-      <CredentialsModal
-        open={showCredentialsModal}
-        onClose={() => setShowCredentialsModal(false)}
-        email={credentials.email}
-        password={credentials.password}
-      />
-    </>
+        <button
+          onClick={inviteConsultant}
+          disabled={isInviting}
+          className="w-full rounded-xl bg-[#2b7a2d] py-3 font-semibold text-white transition hover:bg-[#256927] disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isInviting ? "Sending Invitation..." : "Send Invitation"}
+        </button>
+
+        {statusMessage && (
+          <div
+            className={`rounded-xl px-4 py-3 text-sm font-medium ${
+              statusMessage.type === "success"
+                ? darkMode
+                  ? "bg-green-900/30 text-green-300"
+                  : "bg-green-100 text-green-700"
+                : darkMode
+                ? "bg-red-900/30 text-red-300"
+                : "bg-red-100 text-red-700"
+            }`}
+          >
+            {statusMessage.type === "success" ? "✅ " : "⚠️ "}
+            {statusMessage.text}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

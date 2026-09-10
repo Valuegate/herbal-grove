@@ -24,6 +24,7 @@ import type * as documents from "../documents.js";
 import type * as herbs from "../herbs.js";
 import type * as messages from "../messages.js";
 import type * as research from "../research.js";
+import type * as researchDiscoveries from "../researchDiscoveries.js";
 import type * as saveDocuments from "../saveDocuments.js";
 
 import type {
@@ -49,6 +50,7 @@ declare const fullApi: ApiFromModules<{
   herbs: typeof herbs;
   messages: typeof messages;
   research: typeof research;
+  researchDiscoveries: typeof researchDiscoveries;
   saveDocuments: typeof saveDocuments;
 }>;
 

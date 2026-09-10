@@ -262,5 +262,37 @@ export default defineSchema({
     mimeType: v.string(),
     createdAt: v.number(),
     updatedAt: v.number(),
-  }).index("by_user", ["userId"])
+  }).index("by_user", ["userId"]),
+
+  //Web Scout(Social Media first)
+  researchDiscoveries: defineTable({
+    source: v.string(),
+    sourceUrl: v.string(),
+    sourceId: v.optional(v.string()),
+    title: v.optional(v.string()),
+    content: v.string(),
+    author: v.optional(v.string()),
+    publishedAt: v.optional(v.string()),
+    discoveredAt: v.number(),
+    topics: v.array(v.string()),
+    plants: v.array(v.string()),
+    contentType: v.string(),
+    evidenceType: v.string(),
+    relevanceScore: v.number(),
+    images: v.array(
+      v.object({
+        url: v.string(),
+        altText: v.optional(v.string()),
+      })
+    ),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("approved"),
+      v.literal("rejected")
+    ),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_status", ["status"])
+    .index("by_source", ["source"]),
 });

@@ -8,76 +8,101 @@ import { GoogleIcon, FacebookIcon, EyeIcon, EyeSlashIcon } from "../ui/icons";
 import Link from "next/link";
 
 type FormFields = {
-  email: string,
-  password: string
+  email: string;
+  password: string;
+};
+
+type OAuthStrategy = "oauth_google" | "oauth_facebook";
+
+const inputStyle =
+  "w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-green focus:border-transparent outline-none transition-all text-black text-sm";
+
+// Where the OAuth provider redirect lands to finish the flow.
+// Shared with SignUpForm — one callback route handles both.
+const SSO_CALLBACK_URL = "/sso-callback";
+// Where the user goes once sign-in is fully complete.
+const POST_LOGIN_URL = "/redirect";
+
+function getSignInErrorMessage(error: any): string {
+  const code = error?.code;
+  switch (code) {
+    case "password_incorrect":
+    case "form_password_incorrect":
+      return "Incorrect password. Please try again.";
+    case "identifier_not_found":
+    case "user_not_found":
+      return "No account found for that email address.";
+    case "captcha_invalid":
+    case "captcha_missing_token":
+      return "Captcha validation failed. Please try again.";
+    default:
+      return error?.longMessage || error?.message || "Unable to sign in.";
+  }
 }
 
 export const LoginForm = () => {
   const router = useRouter();
   const { signIn, fetchStatus } = useSignIn();
   const [apiError, setApiError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<FormFields>();
 
-  const getSignInErrorMessage = (error: any) => {
-    const code = error?.code;
-    switch (code) {
-      case "password_incorrect":
-      case "form_password_incorrect":
-        return "Incorrect password. Please try again.";
-      case "identifier_not_found":
-      case "user_not_found":
-        return "No account found for that email address.";
-      case "captcha_invalid":
-      case "captcha_missing_token":
-        return "Captcha validation failed. Please try again.";
-      default:
-        return error?.longMessage || error?.message || "Unable to sign in.";
+  const handleOAuthSignIn = async (strategy: OAuthStrategy) => {
+    if (fetchStatus === "fetching") return;
+
+    setApiError(null);
+
+    try {
+      const { error } = await signIn.sso({
+        strategy,
+        redirectUrl: POST_LOGIN_URL,
+        redirectCallbackUrl: SSO_CALLBACK_URL,
+      });
+
+      if (error) {
+        setApiError(getSignInErrorMessage(error));
+      }
+    } catch (error) {
+      setApiError(
+        error instanceof Error ? error.message : "Unable to continue with that provider."
+      );
     }
   };
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
-  if (fetchStatus === "fetching") return;
+    if (fetchStatus === "fetching") return;
 
-  setApiError(null);
+    setApiError(null);
 
-  const { error } = await signIn.create({
-    identifier: data.email,
-    password: data.password,
-  });
+    const { error } = await signIn.create({
+      identifier: data.email,
+      password: data.password,
+    });
 
-  if (error) {
-    setApiError(getSignInErrorMessage(error));
-    return;
-  }
-
-  if (signIn.status === "complete") {
-    const { error: finalizeError } = await signIn.finalize();
-
-    if (finalizeError) {
-      setApiError(
-        finalizeError.longMessage ??
-        finalizeError.message ??
-        "Unable to finish sign in."
-      );
+    if (error) {
+      setApiError(getSignInErrorMessage(error));
       return;
     }
 
-    router.push("/redirect");
-    return;
-  }
+    if (signIn.status !== "complete") {
+      setApiError("Sign in did not complete.");
+      return;
+    }
 
-  setApiError("Sign in did not complete.");
-};
+    const { error: finalizeError } = await signIn.finalize();
 
-  //Common input Style
-  const inputStyle = "w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-green focus:border-transparent outline-none transition-all text-black text-sm";
+    if (finalizeError) {
+      setApiError(getSignInErrorMessage(finalizeError));
+      return;
+    }
 
-  //Password display states
-  const [showPassword, setShowPassword] = useState(false);
+    router.push(POST_LOGIN_URL);
+  };
 
   return (
     <div className="w-full">
@@ -90,13 +115,17 @@ export const LoginForm = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
         <button
           type="button"
-          className="flex flex-wrap items-center justify-center gap-2 bg-[#f5f5f5] hover:bg-gray-200 text-black py-2.5 rounded-lg text-xs font-semibold transition-colors border border-gray-200 whitespace-normal text-center"
+          onClick={() => handleOAuthSignIn("oauth_google")}
+          disabled={fetchStatus === "fetching"}
+          className="flex flex-wrap items-center justify-center gap-2 bg-[#f5f5f5] hover:bg-gray-200 text-black py-2.5 rounded-lg text-xs font-semibold transition-colors border border-gray-200 whitespace-normal text-center disabled:opacity-50"
         >
           <GoogleIcon className="w-4 h-4" /> Sign in with Google
         </button>
         <button
           type="button"
-          className="flex flex-wrap items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white py-2.5 rounded-lg text-xs font-semibold transition-colors whitespace-normal text-center"
+          onClick={() => handleOAuthSignIn("oauth_facebook")}
+          disabled={fetchStatus === "fetching"}
+          className="flex flex-wrap items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white py-2.5 rounded-lg text-xs font-semibold transition-colors whitespace-normal text-center disabled:opacity-50"
         >
           <FacebookIcon className="w-4 h-4" /> Sign in with Facebook
         </button>
@@ -157,12 +186,10 @@ export const LoginForm = () => {
           )}
         </div>
 
-        {/*Password reset link*/}
-          <p className="text-xs text-[#1a7a1e] mt-2 text-right">
-            <Link href="/forgotpassword">
-              Click to reset password?
-            </Link>
-          </p>
+        {/* Password reset link */}
+        <p className="text-xs text-[#1a7a1e] mt-2 text-right">
+          <Link href="/forgotpassword">Click to reset password?</Link>
+        </p>
 
         <div className="flex items-center gap-2 py-4">
           <input
@@ -170,11 +197,13 @@ export const LoginForm = () => {
             id="remember"
             className="w-4 h-4 accent-[#1a7a1e]"
           />
-          <label htmlFor="remember" className="text-[10px] text-gray-500 leading-tight">Remember Me</label>
+          <label htmlFor="remember" className="text-[10px] text-gray-500 leading-tight">
+            Remember Me
+          </label>
         </div>
 
         <button
-          disabled={isSubmitting}
+          disabled={isSubmitting || fetchStatus === "fetching"}
           type="submit"
           className="w-full bg-[#1a7a1e] hover:bg-[#155d17] text-white font-bold py-3 rounded-lg shadow-lg transition-all active:scale-95 disabled:opacity-50"
         >
@@ -186,16 +215,12 @@ export const LoginForm = () => {
         )}
 
         <p className="text-center text-xs text-gray-600 mt-4">
-          Don't have an account?{" "}
-          <Link
-            href="/sign-up"
-            className="text-[#1a7a1e] font-bold hover:underline"
-          >
+          Don&apos;t have an account?{" "}
+          <Link href="/sign-up" className="text-[#1a7a1e] font-bold hover:underline">
             Create Account
           </Link>
         </p>
       </form>
-      
     </div>
-  )
-}
+  );
+};

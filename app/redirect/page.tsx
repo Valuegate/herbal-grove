@@ -21,17 +21,6 @@ export default function RedirectPage() {
       | "consultant"
       | undefined;
 
-    const mustChangePassword =
-      user.publicMetadata.mustChangePassword as
-        | boolean
-        | undefined;
-
-    // Force consultants to change password first
-    if (role === "consultant" && mustChangePassword) {
-      router.replace("/change-password");
-      return;
-    }
-
     switch (role) {
       case "admin":
         router.replace("/admin/dashboard");

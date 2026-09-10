@@ -14,12 +14,39 @@ type FormFields = {
   confirmPassword: string;
 };
 
+type OAuthStrategy = "oauth_google" | "oauth_facebook";
+
 const inputStyle =
   "w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-green focus:border-transparent outline-none transition-all text-black text-sm";
+
+// Where the OAuth provider redirect lands to finish the flow.
+const SSO_CALLBACK_URL = "/sso-callback";
+// Where the user goes once sign-up is fully complete — routes through
+// the same role/password-check logic as login, for both OAuth and
+// password sign-up.
+const POST_SIGNUP_URL = "/redirect";
 
 function FieldError({ message }: { message?: string }) {
   if (!message) return null;
   return <p className="text-red-500 text-xs">{message}</p>;
+}
+
+function getSignUpErrorMessage(error: any): string {
+  const code = error?.code;
+  switch (code) {
+    case "form_identifier_exists":
+    case "identifier_already_exists":
+      return "An account with that email already exists.";
+    case "form_password_pwned":
+      return "That password has appeared in a data breach. Please choose another.";
+    case "form_password_length_too_short":
+      return "Password is too short.";
+    case "captcha_invalid":
+    case "captcha_missing_token":
+      return "Captcha validation failed. Please try again.";
+    default:
+      return error?.longMessage || error?.message || "Unable to create account.";
+  }
 }
 
 export const SignUpForm = () => {
@@ -37,6 +64,28 @@ export const SignUpForm = () => {
     formState: { errors, isSubmitting },
   } = useForm<FormFields>();
 
+  const handleOAuthSignUp = async (strategy: OAuthStrategy) => {
+    if (fetchStatus === "fetching") return;
+
+    setApiError(null);
+
+    try {
+      const { error } = await signUp.sso({
+        strategy,
+        redirectUrl: POST_SIGNUP_URL,
+        redirectCallbackUrl: SSO_CALLBACK_URL,
+      });
+
+      if (error) {
+        setApiError(getSignUpErrorMessage(error));
+      }
+    } catch (error) {
+      setApiError(
+        error instanceof Error ? error.message : "Unable to continue with that provider."
+      );
+    }
+  };
+
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
     if (fetchStatus === "fetching") return;
 
@@ -44,7 +93,7 @@ export const SignUpForm = () => {
 
     const [firstName, lastName] = data.fullname.trim().split(/\s+/, 2);
 
-    const { error } = await signUp.create({
+    const { error } = await signUp.password({
       emailAddress: data.email,
       password: data.password,
       firstName,
@@ -52,11 +101,26 @@ export const SignUpForm = () => {
     });
 
     if (error) {
-      setApiError(error.longMessage || error.message);
+      setApiError(getSignUpErrorMessage(error));
       return;
     }
 
-    router.push("/signup-successful");
+    if (signUp.status !== "complete") {
+      // Most commonly this means email/phone verification is required
+      // before the account can be finalized. Route the user to whatever
+      // verification step your app uses; adjust as needed.
+      router.push("/verify-email");
+      return;
+    }
+
+    const { error: finalizeError } = await signUp.finalize();
+
+    if (finalizeError) {
+      setApiError(getSignUpErrorMessage(finalizeError));
+      return;
+    }
+
+    router.push(POST_SIGNUP_URL);
   };
 
   return (
@@ -70,13 +134,18 @@ export const SignUpForm = () => {
       <div className="grid grid-cols-2 gap-4 mb-6">
         <button
           type="button"
-          className="flex items-center justify-center gap-2 bg-[#f5f5f5] hover:bg-gray-200 text-black py-2.5 rounded-lg text-xs font-semibold transition-colors border border-gray-200"
+          onClick={() => handleOAuthSignUp("oauth_google")}
+          disabled={fetchStatus === "fetching"}
+          className="flex items-center justify-center gap-2 bg-[#f5f5f5] hover:bg-gray-200 text-black py-2.5 rounded-lg text-xs font-semibold transition-colors border border-gray-200 disabled:opacity-50"
         >
           <GoogleIcon className="w-4 h-4" /> Google
         </button>
+
         <button
           type="button"
-          className="flex items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white py-2.5 rounded-lg text-xs font-semibold transition-colors"
+          onClick={() => handleOAuthSignUp("oauth_facebook")}
+          disabled={fetchStatus === "fetching"}
+          className="flex items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white py-2.5 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
         >
           <FacebookIcon className="w-4 h-4" /> Facebook
         </button>
@@ -178,7 +247,7 @@ export const SignUpForm = () => {
         <div id="clerk-captcha" data-cl-theme="dark" data-cl-size="flexible" data-cl-language="en-us" />
 
         <button
-          disabled={isSubmitting}
+          disabled={isSubmitting || fetchStatus === "fetching"}
           type="submit"
           className="w-full bg-[#1a7a1e] hover:bg-[#155d17] text-white font-bold py-3 rounded-lg shadow-lg transition-all active:scale-95 disabled:opacity-50"
         >
