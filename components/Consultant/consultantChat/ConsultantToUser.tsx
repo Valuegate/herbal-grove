@@ -92,6 +92,7 @@ export default function ConsultantToUser({ consultationId }: Props) {
   }
 
   const { consultant, consultation, slot } = data;
+  const journalShared = consultation.journalShared === true;
 
   if (!consultant) {
     return <CenteredMessage darkMode={darkMode}>Consultant not found.</CenteredMessage>;
@@ -183,7 +184,16 @@ export default function ConsultantToUser({ consultationId }: Props) {
   // ACTIVE — consultant has accepted; normal chat is available.
   return (
     <PageShell darkMode={darkMode}>
-      <Header consultation={consultation} user={{ name: consultation.userName }} onOpenCareJournal={() => setShowCareJournal(true)} />
+      <Header 
+        consultation={consultation} 
+        user={{ name: consultation.userName }} 
+        journalShared={journalShared}
+        onOpenCareJournal={
+          consultation.status === "active" && journalShared
+          ? () => setShowCareJournal(true)
+          : undefined
+        } 
+      />
 
       {showCareJournal && (
         <ViewCareJournal

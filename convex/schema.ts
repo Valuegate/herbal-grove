@@ -215,7 +215,9 @@ export default defineSchema({
     status: v.union(
       v.literal("pending"),
       v.literal("active"),
-      v.literal("completed"),    ),
+      v.literal("completed")
+    ),
+    journalShared: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -295,4 +297,24 @@ export default defineSchema({
   })
     .index("by_status", ["status"])
     .index("by_source", ["source"]),
+
+  // Notifications
+  notifications: defineTable({
+    recipientId: v.string(),
+    title: v.string(),
+    message: v.string(),
+    type: v.union(
+      v.literal("consultation_booking"),
+      v.literal("consultation_message"),
+      v.literal("consultation_status"),
+      v.literal("research_review"),
+      v.literal("document_review"),
+      v.literal("system")
+    ),
+    link: v.optional(v.string()),
+    isRead: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_recipient", ["recipientId"])
+    .index("by_recipient_and_read", ["recipientId", "isRead"]),
 });

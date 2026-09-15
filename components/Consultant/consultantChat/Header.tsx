@@ -13,14 +13,12 @@ interface Props {
     _id: Id<"consultations">;
     status: "pending" | "active" | "completed";
   };
-
-  user: {
-    name: string;
-  };
+  user: { name: string };
   onOpenCareJournal?: () => void;
+  journalShared?: boolean;
 }
 
-export default function Header({ consultation, user, onOpenCareJournal }: Props) {
+export default function Header({ consultation, user, onOpenCareJournal, journalShared }: Props) {
   const router = useRouter();
   const { darkMode } = useUIStateContext();
 
@@ -69,7 +67,7 @@ export default function Header({ consultation, user, onOpenCareJournal }: Props)
           </button>
         )}
 
-        {consultation.status === "active" && (
+        {consultation.status === "active" && journalShared &&(
           <button
             type="button"
             onClick={onOpenCareJournal}

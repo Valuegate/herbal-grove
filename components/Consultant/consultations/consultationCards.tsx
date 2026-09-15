@@ -1,7 +1,9 @@
 "use client";
 
-import { Clock3, MoreVertical, CalendarDays, MessageSquare } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Clock3, MoreVertical, CalendarDays, MessageSquare } from "lucide-react";
+
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -44,13 +46,39 @@ function formatTime(timestamp: number) {
 
 export default function ConsultationCard({ consultation }: ConsultationCardProps) {
   const { darkMode } = useUIStateContext();
+  const [now, setNow] = useState(Date.now());
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(Date.now());
+    }, 30_000);
+    
+    return () => clearInterval(interval);
+  }, []);
+  
   const router = useRouter();
-
   const acceptConsultation = useMutation(api.consultations.acceptConsultation);
   const slot = useQuery(api.availableSlots.getSlotById, { slotId: consultation.slotId });
 
   const isPending = consultation.status === "pending";
   const isActive = consultation.status === "active";
+  const earliestAcceptanceTime = slot
+    ? slot.startTime - 10 * 60 * 1000
+    : null;
+
+  const canAccept =
+    isPending &&
+    slot !== undefined &&
+    slot !== null &&
+    earliestAcceptanceTime !== null &&
+    now >= earliestAcceptanceTime &&
+    now <= slot.endTime;
+
+  const appointmentPassed =
+    isPending &&
+    slot !== undefined &&
+    slot !== null &&
+    now > slot.endTime;
   const { label: statusLabel, badgeClass } = STATUS_META[consultation.status];
 
   const initials = consultation.userName
@@ -66,8 +94,13 @@ export default function ConsultationCard({ consultation }: ConsultationCardProps
   async function handleConsultation() {
     try {
       if (isPending) {
-        await acceptConsultation({ consultationId: consultation._id });
+        if (!canAccept) return;
+
+        await acceptConsultation({
+          consultationId: consultation._id,
+        });
       }
+
       router.push(`/consultant/chat/${consultation._id}`);
     } catch (error) {
       console.error("Failed to update consultation:", error);
@@ -150,19 +183,46 @@ export default function ConsultationCard({ consultation }: ConsultationCardProps
         </div>
       </div>
 
+      {isPending && slot && !canAccept && (
+        <div className="mt-4">
+          <p
+            className={`text-sm ${
+              appointmentPassed
+                ? "text-red-600"
+                : darkMode
+                  ? "text-neutral-400"
+                  : "text-gray-500"
+            }`}
+          >
+            {appointmentPassed
+              ? "This appointment time has already passed."
+              : `You can accept this consultation from ${formatTime(
+                  slot.startTime - 10 * 60 * 1000
+                )}.`}
+          </p>
+        </div>
+      )}
+
       {/* Action */}
       <div className="mt-5 flex justify-end">
         <button
           type="button"
           onClick={handleConsultation}
+          disabled={isPending && !canAccept}
           className={
-            isPending || isActive
-              ? "rounded-full bg-green-700 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800"
-              : `rounded-full border px-6 py-2.5 text-sm font-semibold ${
+            isPending && !canAccept
+              ? `cursor-not-allowed rounded-full px-6 py-2.5 text-sm font-semibold ${
                   darkMode
-                    ? "border-neutral-700 text-neutral-300 hover:bg-neutral-800"
-                    : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                    ? "bg-neutral-800 text-neutral-500"
+                    : "bg-gray-200 text-gray-400"
                 }`
+              : isPending || isActive
+                ? "rounded-full bg-green-700 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800"
+                : `rounded-full border px-6 py-2.5 text-sm font-semibold ${
+                    darkMode
+                      ? "border-neutral-700 text-neutral-300 hover:bg-neutral-800"
+                      : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                  }`
           }
         >
           {STATUS_META[consultation.status].buttonLabel}

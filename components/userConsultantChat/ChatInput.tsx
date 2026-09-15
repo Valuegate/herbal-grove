@@ -27,7 +27,6 @@ export default function ChatInput({
 
     await sendMessage({
       consultationId,
-      sender: "user",
       content: message.trim(),
     });
 

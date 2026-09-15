@@ -353,14 +353,6 @@ export default function ChatConsultant() {
                       : "Professional herbal wellness guidance."}
                   </p>
 
-                  {/* Online status */}
-                  <span
-                    className={`text-xs font-semibold ${
-                      consultant.isOnline ? "text-green-600" : darkMode ? "text-neutral-500" : "text-gray-400"
-                    }`}
-                  >
-                    ● {consultant.isOnline ? "Online" : "Offline"}
-                  </span>
                 </div>
               </div>
 
@@ -382,12 +374,6 @@ export default function ChatConsultant() {
           <span className={`text-xs font-medium uppercase tracking-wide ${headingClass}`}>
             Pending Consultations
           </span>
-          <Link
-            href="/dashboard/history"
-            className={`text-sm font-bold underline ${darkMode ? "text-white" : "text-green-700"}`}
-          >
-            View All
-          </Link>
         </div>
 
         <div className={listClass}>

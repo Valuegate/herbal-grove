@@ -4,7 +4,8 @@ import type { ReactNode } from "react";
 
 import ConsultantSidebar from "@/components/Consultant/sidebar";
 import { useUIStateContext } from "@/components/UIStateContext";
-import { NotificationIcon, ProfileIcon, ModeChangeIcon, MenuIcon } from "@/components/ui/icons";
+import { ModeChangeIcon, MenuIcon } from "@/components/ui/icons";
+import Notifications from "@/components/Notifications";
 
 export default function ConsultantLayout({ children }: {
   children: ReactNode;
@@ -52,25 +53,7 @@ export default function ConsultantLayout({ children }: {
             </button>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              className={`p-2.5 rounded-full shadow-sm hover:scale-105 active:scale-95 transition-all duration-150 ${
-                darkMode
-                  ? "bg-[#1e1e1e] hover:bg-neutral-800 text-neutral-300"
-                  : "bg-white hover:bg-gray-50 text-gray-600"
-              }`}
-            >
-              <NotificationIcon />
-            </button>
-
-            <button
-              className={`p-2.5 rounded-full shadow-sm hover:scale-105 active:scale-95 transition-all duration-150 ${
-                darkMode
-                  ? "bg-[#1e1e1e] hover:bg-neutral-800 text-neutral-300"
-                  : "bg-white hover:bg-gray-50 text-gray-600"
-              }`}
-            >
-              <ProfileIcon />
-            </button>
+            <Notifications />
 
             <button
               onClick={toggleDarkMode}

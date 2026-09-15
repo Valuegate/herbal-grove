@@ -35,28 +35,6 @@ export async function searchChunks(
 
   console.log("RAG chunks found:", chunks.length);
 
-  // const rankedChunks: SearchChunkResult[] = chunks
-  //   .map((chunk: Chunk): SearchChunkResult => ({
-  //     text: chunk.text,
-  //     similarity: cosineSimilarity(
-  //       queryEmbedding,
-  //       chunk.embedding
-  //     ),
-  //     documentId: chunk.documentId,
-  //     page: chunk.page,
-  //   }))
-  //   .filter(
-  //     (chunk: SearchChunkResult) =>
-  //       chunk.similarity >= threshold
-  //   )
-  //   .sort(
-  //     (
-  //       a: SearchChunkResult,
-  //       b: SearchChunkResult
-  //     ) => b.similarity - a.similarity
-  //   )
-  //   .slice(0, limit);
-
   const rankedChunks: SearchChunkResult[] = chunks
     .map((chunk: Chunk): SearchChunkResult => ({
       text: chunk.text,

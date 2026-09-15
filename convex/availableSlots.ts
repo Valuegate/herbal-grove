@@ -121,6 +121,13 @@ export const bookConsultation = mutation({
   },
 
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error("You must be signed in.");
+    }
+
+    const userId = identity.subject;
     const durationMs = (args.durationMinutes ?? 30) * 60 * 1000;
     const endTime = args.startTime + durationMs;
 
@@ -133,7 +140,7 @@ export const bookConsultation = mutation({
     const consultations = await ctx.db
       .query("consultations")
       .withIndex("by_user_consultant", (q) =>
-        q.eq("userId", args.userId).eq("consultantId", args.consultantId)
+        q.eq("userId", userId).eq("consultantId", args.consultantId)
       )
       .collect();
 
@@ -193,7 +200,7 @@ export const bookConsultation = mutation({
     });
 
     const consultationId = await ctx.db.insert("consultations", {
-      userId: args.userId,
+      userId,
       userName: args.userName,
       userEmail: args.userEmail,
       consultantId: args.consultantId,
@@ -202,6 +209,21 @@ export const bookConsultation = mutation({
       status: "pending",
       createdAt: now,
       updatedAt: now,
+    });
+
+    const consultant = await ctx.db.get(args.consultantId);
+    if (!consultant) {
+      throw new Error("Consultant not found.");
+    }
+
+    await ctx.db.insert("notifications", {
+      recipientId: consultant.clerkId,
+      title: "New consultation request",
+      message: `${args.userName} booked a consultation with you.`,
+      type: "consultation_booking",
+      link: `/consultant/consultations`,
+      isRead: false,
+      createdAt: now,
     });
 
     return { consultationId, slotId };

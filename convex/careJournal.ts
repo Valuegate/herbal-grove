@@ -65,6 +65,10 @@ export const getConsultantUserNotes = query({
       );
     }
 
+    if (consultation.journalShared !== true) {
+      throw new Error("This user's Care Journal is private.");
+    }
+
     return await ctx.db
       .query("careJournalNotes")
       .withIndex("by_user", (q) =>
@@ -200,6 +204,10 @@ export const getConsultantUserDocuments = query({
       );
     }
 
+    if (consultation.journalShared !== true) {
+      throw new Error("This user's Care Journal is private.");
+    }
+    
     return await ctx.db
       .query("careJournalDocuments")
       .withIndex("by_user", (q) =>

@@ -43,6 +43,7 @@ export default function UserToConsultant({
   }
 
   const { consultant, consultation } = data;
+  const journalShared = consultation.journalShared === true;
 
   // Consultant record no longer exists
   if (!consultant) {
@@ -55,11 +56,15 @@ export default function UserToConsultant({
 
   return (
     <div
-      className={`h-dvh flex flex-col ${
+      className={`h-full min-h-0 flex flex-col ${
         darkMode ? "bg-[#121212]" : "bg-[#F7F8FA]"
       }`}
     >
-      <Header consultant={consultant} />
+      <Header 
+        consultant={consultant}
+        journalShared={journalShared}
+        consultationId={consultation._id}
+      />
 
       <Messages consultationId={consultation._id} />
 

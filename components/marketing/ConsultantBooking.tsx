@@ -226,11 +226,6 @@ export default function ConsultantBooking({ params }: Props) {
               {consultant.specialization || "Herbal Wellness Consultant"}
             </p>
 
-            <div className="mt-3 flex items-center gap-2 text-sm">
-              <span className={consultant.isOnline ? "font-semibold text-green-600" : "text-gray-400"}>
-                ● {consultant.isOnline ? "Online" : "Offline"}
-              </span>
-            </div>
           </div>
         </div>
 
