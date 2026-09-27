@@ -26,9 +26,21 @@ interface ConsultationCardProps {
 }
 
 const STATUS_META = {
-  pending: { label: "Pending", badgeClass: "bg-yellow-100 text-yellow-700", buttonLabel: "Accept Consultation" },
-  active: { label: "Active", badgeClass: "bg-green-100 text-green-700", buttonLabel: "Open Chat" },
-  completed: { label: "Completed", badgeClass: "bg-blue-100 text-blue-700", buttonLabel: "View Consultation" },
+  pending: { 
+    label: "Pending", 
+    badgeClass: "bg-yellow-100 text-yellow-700", 
+    buttonLabel: "Accept Consultation"
+  },
+  active: { 
+    label: "Active", 
+    badgeClass: "bg-green-100 text-green-700", 
+    buttonLabel: "Open Chat"
+  },
+  completed: { 
+    label: "Completed", 
+    badgeClass: "bg-blue-100 text-blue-700", 
+    buttonLabel: "View Consultation"
+  }
 } as const;
 
 function formatDate(timestamp: number) {
@@ -63,7 +75,7 @@ export default function ConsultationCard({ consultation }: ConsultationCardProps
   const isPending = consultation.status === "pending";
   const isActive = consultation.status === "active";
   const earliestAcceptanceTime = slot
-    ? slot.startTime - 10 * 60 * 1000
+    ? slot.startTime - 5 * 60 * 1000
     : null;
 
   const canAccept =
@@ -197,7 +209,7 @@ export default function ConsultationCard({ consultation }: ConsultationCardProps
             {appointmentPassed
               ? "This appointment time has already passed."
               : `You can accept this consultation from ${formatTime(
-                  slot.startTime - 10 * 60 * 1000
+                  slot.startTime - 5 * 60 * 1000
                 )}.`}
           </p>
         </div>

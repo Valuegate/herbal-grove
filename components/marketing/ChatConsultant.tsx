@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useUIStateContext } from "@/components/UIStateContext";
 import { UserRound } from "lucide-react";
 
-import { useQuery } from "convex/react";
+import { useEffect } from "react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Doc } from "@/convex/_generated/dataModel";
 
@@ -29,6 +30,10 @@ const HISTORY_STATUS_STYLES: Record<
     label: "Completed",
     className: (darkMode) => (darkMode ? "bg-neutral-800 text-neutral-400" : "bg-gray-100 text-gray-500"),
   },
+  expired: {
+    label: "Expired",
+    className: (darkMode) => (darkMode ? "bg-red-950/40 text-red-400" : "bg-red-50 text-red-700"),
+  },
 };
 
 function truncate(text: string, max: number) {
@@ -37,6 +42,24 @@ function truncate(text: string, max: number) {
 
 function formatTime(timestamp: number) {
   return new Date(timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+function formatDate(timestamp: number) {
+  return new Date(timestamp).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+}
+
+function rowClass(darkMode: boolean) {
+  return `flex flex-col gap-4 px-5 py-5 transition-colors ${darkMode ? "hover:bg-[#2b2b2b]" : "hover:bg-gray-50"}`;
+}
+
+// Fetches the consultant and appointment slot behind a consultation.
+function useConsultationDetails(consultation: Doc<"consultations">) {
+  const consultant = useQuery(api.consultants.getConsultantById, {
+    consultantId: consultation.consultantId,
+  });
+  const slot = useQuery(api.availableSlots.getSlotById, { slotId: consultation.slotId });
+
+  return { consultant, slot };
 }
 
 function Tag({ label, darkMode }: { label: string; darkMode: boolean }) {
@@ -59,6 +82,50 @@ function StatusMessage({ darkMode, text }: { darkMode: boolean; text: string }) 
   );
 }
 
+function ItemLoading() {
+  return (
+    <div className="px-5 py-5">
+      <p className="text-sm text-gray-500">Loading consultation...</p>
+    </div>
+  );
+}
+
+function ConsultantHeader({
+  consultant,
+  darkMode,
+  size = 44,
+}: {
+  consultant: { imageUrl?: string; fullName: string; specialization?: string };
+  darkMode: boolean;
+  size?: number;
+}) {
+  return (
+    <div className="flex items-center gap-4">
+      <div
+        className="flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200"
+        style={{ width: size, height: size }}
+      >
+        <Image
+          src={consultant.imageUrl || "/default-avatar.png"}
+          alt={consultant.fullName}
+          width={50}
+          height={50}
+          className="h-full w-full object-cover"
+        />
+      </div>
+
+      <div>
+        <h4 className={`text-sm font-bold ${darkMode ? "text-white" : "text-neutral-900"}`}>
+          {consultant.fullName}
+        </h4>
+        <p className={`text-xs ${darkMode ? "text-neutral-400" : "text-gray-500"}`}>
+          {consultant.specialization || "Herbal Wellness Consultant"}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function PendingConsultation({
   consultation,
   darkMode,
@@ -66,61 +133,44 @@ function PendingConsultation({
   consultation: Doc<"consultations">;
   darkMode: boolean;
 }) {
-  const consultant = useQuery(api.consultants.getConsultantById, {
-    consultantId: consultation.consultantId,
-  });
+  const { consultant, slot } = useConsultationDetails(consultation);
+  const expirePendingConsultation = useMutation(api.consultations.expirePendingConsultation);
 
-  const slot = useQuery(api.availableSlots.getSlotById, {
-    slotId: consultation.slotId,
-  });
+  useEffect(() => {
+    if (!slot || consultation.status !== "pending") return;
 
-  if (!consultant || !slot) {
-    return (
-      <div className="px-5 py-5">
-        <p className="text-sm text-gray-500">Loading consultation...</p>
-      </div>
-    );
-  }
+    const expireAt = slot.endTime;
+
+    async function expire() {
+      try {
+        await expirePendingConsultation({ consultationId: consultation._id });
+      } catch (error) {
+        console.error("Failed to expire consultation:", error);
+      }
+    }
+
+    // Appointment has already ended.
+    if (Date.now() >= expireAt) {
+      void expire();
+      return;
+    }
+
+    // Keep the card alive until the exact appointment end time.
+    const timeout = window.setTimeout(() => void expire(), expireAt - Date.now());
+    return () => window.clearTimeout(timeout);
+  }, [slot, consultation._id, consultation.status, expirePendingConsultation]);
+
+  if (!consultant || !slot) return <ItemLoading />;
 
   return (
-    <div
-      className={`flex flex-col gap-4 px-5 py-5 transition-colors ${
-        darkMode ? "hover:bg-[#2b2b2b]" : "hover:bg-gray-50"
-      }`}
-    >
-      {/* Consultant */}
-      <div className="flex items-center gap-4">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200">
-          <Image
-            src={consultant.imageUrl || "/default-avatar.png"}
-            alt={consultant.fullName}
-            width={50}
-            height={50}
-            className="h-full w-full object-cover"
-          />
-        </div>
-
-        <div>
-          <h4 className={`text-sm font-bold ${darkMode ? "text-white" : "text-neutral-900"}`}>
-            {consultant.fullName}
-          </h4>
-          <p className={`text-xs ${darkMode ? "text-neutral-400" : "text-gray-500"}`}>
-            {consultant.specialization || "Herbal Wellness Consultant"}
-          </p>
-        </div>
-      </div>
+    <div className={rowClass(darkMode)}>
+      <ConsultantHeader consultant={consultant} darkMode={darkMode} size={44} />
 
       {/* Appointment */}
       <div className={`rounded-xl p-4 ${darkMode ? "bg-[#181818]" : "bg-gray-50"}`}>
-        <p className="text-[10px] font-bold uppercase tracking-wider text-green-700">
-          Requested Appointment
-        </p>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-green-700">Requested Appointment</p>
         <p className={`mt-2 text-sm font-semibold ${darkMode ? "text-white" : "text-neutral-900"}`}>
-          {new Date(slot.startTime).toLocaleDateString(undefined, {
-            weekday: "long",
-            month: "long",
-            day: "numeric",
-          })}
+          {formatDate(slot.startTime)}
         </p>
         <p className={`mt-1 text-xs ${darkMode ? "text-neutral-400" : "text-gray-500"}`}>
           {formatTime(slot.startTime)} – {formatTime(slot.endTime)}
@@ -150,52 +200,16 @@ function ConsultationHistoryItem({
   consultation: Doc<"consultations">;
   darkMode: boolean;
 }) {
-  const consultant = useQuery(api.consultants.getConsultantById, {
-    consultantId: consultation.consultantId,
-  });
+  const { consultant, slot } = useConsultationDetails(consultation);
 
-  const slot = useQuery(api.availableSlots.getSlotById, {
-    slotId: consultation.slotId,
-  });
-
-  if (!consultant || !slot) {
-    return (
-      <div className="px-5 py-5">
-        <p className="text-sm text-gray-500">Loading consultation...</p>
-      </div>
-    );
-  }
+  if (!consultant || !slot) return <ItemLoading />;
 
   const status = HISTORY_STATUS_STYLES[consultation.status];
 
   return (
-    <div
-      className={`flex flex-col gap-4 px-5 py-5 transition-colors ${
-        darkMode ? "hover:bg-[#2b2b2b]" : "hover:bg-gray-50"
-      }`}
-    >
-      {/* Consultant */}
+    <div className={rowClass(darkMode)}>
       <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200">
-            <Image
-              src={consultant.imageUrl || "/default-avatar.png"}
-              alt={consultant.fullName}
-              width={50}
-              height={50}
-              className="h-full w-full object-cover"
-            />
-          </div>
-
-          <div>
-            <h4 className={`text-sm font-bold ${darkMode ? "text-white" : "text-neutral-900"}`}>
-              {consultant.fullName}
-            </h4>
-            <p className={`text-xs ${darkMode ? "text-neutral-400" : "text-gray-500"}`}>
-              {consultant.specialization || "Herbal Wellness Consultant"}
-            </p>
-          </div>
-        </div>
+        <ConsultantHeader consultant={consultant} darkMode={darkMode} size={40} />
 
         <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase ${status.className(darkMode)}`}>
           {status.label}
@@ -205,14 +219,10 @@ function ConsultationHistoryItem({
       {/* Appointment */}
       <div>
         <p className={`text-sm font-semibold ${darkMode ? "text-neutral-200" : "text-neutral-800"}`}>
-          {new Date(slot.startTime).toLocaleDateString(undefined, {
-            weekday: "long",
-            month: "long",
-            day: "numeric",
-          })}
+          {formatDate(slot.startTime)}
         </p>
         <p className={`mt-1 text-xs ${darkMode ? "text-neutral-400" : "text-gray-500"}`}>
-          {formatTime(slot.startTime)} – {formatTime(slot.endTime)}
+          {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
         </p>
       </div>
 
@@ -237,8 +247,15 @@ function ConsultationHistoryItem({
       )}
 
       {consultation.status === "completed" && (
-        <div className={`text-xs ${darkMode ? "text-neutral-500" : "text-gray-400"}`}>
-          Consultation completed
+        <div className={`text-xs ${darkMode ? "text-neutral-500" : "text-gray-400"}`}>Consultation completed</div>
+      )}
+
+      {consultation.status === "expired" && (
+        <div className={`rounded-lg px-3 py-3 text-xs ${darkMode ? "bg-red-950/20 text-red-300" : "bg-red-50 text-red-700"}`}>
+          <p className="font-semibold">Consultation expired</p>
+          <p className="mt-1 opacity-80">
+            The consultant didn't accept your request before the appointment time ended.
+          </p>
         </div>
       )}
     </div>
@@ -348,11 +365,8 @@ export default function ChatConsultant() {
 
                   {/* Bio */}
                   <p className={`max-w-xl text-sm ${mutedClass}`}>
-                    {consultant.bio
-                      ? truncate(consultant.bio, 100)
-                      : "Professional herbal wellness guidance."}
+                    {consultant.bio ? truncate(consultant.bio, 100) : "Professional herbal wellness guidance."}
                   </p>
-
                 </div>
               </div>
 

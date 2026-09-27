@@ -11,7 +11,7 @@ import { Id } from "@/convex/_generated/dataModel";
 interface Props {
   consultation: {
     _id: Id<"consultations">;
-    status: "pending" | "active" | "completed";
+    status: "pending" | "active" | "completed" | "expired";
   };
   user: { name: string };
   onOpenCareJournal?: () => void;

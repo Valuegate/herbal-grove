@@ -8,6 +8,10 @@ import { Id } from "@/convex/_generated/dataModel";
 
 import { CalendarDays, Clock3, CheckCircle2 } from "lucide-react";
 
+import { useConsultationCountdown } from "@/hooks/useConsultationCountdown";
+import ConsultationCountdown from "../ConsultantCountdown";
+import { useConsultationPresence } from "@/hooks/useConsultationPresence";
+
 import ViewCareJournal from "../viewcarejournal/ViewCareJournal";
 import Header from "./Header";
 import Messages from "./Messages";
@@ -21,10 +25,17 @@ function formatTime(timestamp: number) {
   return new Date(timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 }
 
+function formatDate(timestamp: number) {
+  return new Date(timestamp).toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 function PageShell({ darkMode, children }: { darkMode: boolean; children: React.ReactNode }) {
-  return (
-    <div className={`h-dvh flex flex-col ${darkMode ? "bg-[#121212]" : "bg-[#F7F8FA]"}`}>{children}</div>
-  );
+  return <div className={`h-dvh flex flex-col ${darkMode ? "bg-[#121212]" : "bg-[#F7F8FA]"}`}>{children}</div>;
 }
 
 function CenteredMessage({ darkMode, children }: { darkMode: boolean; children: React.ReactNode }) {
@@ -32,6 +43,18 @@ function CenteredMessage({ darkMode, children }: { darkMode: boolean; children: 
     <div
       className={`h-dvh flex items-center justify-center ${
         darkMode ? "bg-[#121212] text-white" : "bg-[#F7F8FA] text-neutral-900"
+      }`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function FooterNotice({ darkMode, children }: { darkMode: boolean; children: React.ReactNode }) {
+  return (
+    <div
+      className={`border-t px-4 py-4 text-center text-sm font-medium ${
+        darkMode ? "border-neutral-800 bg-[#1E1E1E] text-neutral-400" : "border-gray-200 bg-white text-gray-500"
       }`}
     >
       {children}
@@ -63,9 +86,7 @@ function StatusCard({
           <CheckCircle2 size={32} className={iconColor} />
         </div>
 
-        <h1 className={`mt-5 text-2xl font-bold ${darkMode ? "text-white" : "text-neutral-900"}`}>
-          {title}
-        </h1>
+        <h1 className={`mt-5 text-2xl font-bold ${darkMode ? "text-white" : "text-neutral-900"}`}>{title}</h1>
 
         {children}
       </div>
@@ -80,8 +101,18 @@ export default function ConsultantToUser({ consultationId }: Props) {
     consultationId: consultationId as Id<"consultations">,
   });
 
-  // Move all hooks to the top, before any conditional returns
+  // Hooks must run before any conditional return.
   const [showCareJournal, setShowCareJournal] = useState(false);
+  const consultationForPresence = data?.consultation?._id;
+  const isActive = data?.consultation?.status === "active";
+
+  useConsultationPresence(consultationForPresence as Id<"consultations">, isActive);
+
+  const { remainingSeconds, showCountdown, hasEnded } = useConsultationCountdown({
+    consultationId: data?.consultation?._id,
+    endTime: data?.slot?.endTime,
+    isActive,
+  });
 
   if (data === undefined) {
     return <CenteredMessage darkMode={darkMode}>Loading consultation...</CenteredMessage>;
@@ -92,11 +123,12 @@ export default function ConsultantToUser({ consultationId }: Props) {
   }
 
   const { consultant, consultation, slot } = data;
-  const journalShared = consultation.journalShared === true;
 
   if (!consultant) {
     return <CenteredMessage darkMode={darkMode}>Consultant not found.</CenteredMessage>;
   }
+
+  const journalShared = consultation.journalShared === true;
   const mutedClass = darkMode ? "text-neutral-300" : "text-gray-600";
   const headingClass = darkMode ? "text-white" : "text-neutral-900";
 
@@ -106,12 +138,7 @@ export default function ConsultantToUser({ consultationId }: Props) {
       <PageShell darkMode={darkMode}>
         <Header consultation={consultation} user={{ name: consultation.userName }} />
 
-        <StatusCard
-          darkMode={darkMode}
-          iconBg="bg-green-100"
-          iconColor="text-green-700"
-          title="Consultation Request Sent"
-        >
+        <StatusCard darkMode={darkMode} iconBg="bg-green-100" iconColor="text-green-700" title="Consultation Request Sent">
           <p className={`mt-3 text-sm leading-6 ${mutedClass}`}>
             Your consultation request has been sent to <strong>{consultant.fullName}</strong>.
           </p>
@@ -122,21 +149,12 @@ export default function ConsultantToUser({ consultationId }: Props) {
                 darkMode ? "border-neutral-700 bg-[#181818]" : "border-gray-200 bg-gray-50"
               }`}
             >
-              <p className="mb-3 text-xs font-bold uppercase tracking-wide text-green-700">
-                Your Appointment
-              </p>
+              <p className="mb-3 text-xs font-bold uppercase tracking-wide text-green-700">Your Appointment</p>
 
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <CalendarDays size={18} className="text-green-700" />
-                  <span className={`text-sm font-semibold ${headingClass}`}>
-                    {new Date(slot.startTime).toLocaleDateString(undefined, {
-                      weekday: "long",
-                      month: "long",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </span>
+                  <span className={`text-sm font-semibold ${headingClass}`}>{formatDate(slot.startTime)}</span>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -171,12 +189,9 @@ export default function ConsultantToUser({ consultationId }: Props) {
   if (consultation.status === "completed") {
     return (
       <PageShell darkMode={darkMode}>
-        <Header
-          consultation={consultation}
-          user={{ name: consultation.userName }}
-        />
-
+        <Header consultation={consultation} user={{ name: consultation.userName }} />
         <Messages consultationId={consultation._id} />
+        <FooterNotice darkMode={darkMode}>This consultation has ended.</FooterNotice>
       </PageShell>
     );
   }
@@ -184,16 +199,14 @@ export default function ConsultantToUser({ consultationId }: Props) {
   // ACTIVE — consultant has accepted; normal chat is available.
   return (
     <PageShell darkMode={darkMode}>
-      <Header 
-        consultation={consultation} 
-        user={{ name: consultation.userName }} 
+      <Header
+        consultation={consultation}
+        user={{ name: consultation.userName }}
         journalShared={journalShared}
-        onOpenCareJournal={
-          consultation.status === "active" && journalShared
-          ? () => setShowCareJournal(true)
-          : undefined
-        } 
+        onOpenCareJournal={isActive && journalShared ? () => setShowCareJournal(true) : undefined}
       />
+
+      {showCountdown && <ConsultationCountdown remainingSeconds={remainingSeconds} />}
 
       {showCareJournal && (
         <ViewCareJournal
@@ -205,7 +218,12 @@ export default function ConsultantToUser({ consultationId }: Props) {
       )}
 
       <Messages consultationId={consultation._id} />
-      <Input consultationId={consultation._id} />
+
+      {hasEnded ? (
+        <FooterNotice darkMode={darkMode}>This consultation has ended.</FooterNotice>
+      ) : (
+        <Input consultationId={consultation._id} />
+      )}
     </PageShell>
   );
 }

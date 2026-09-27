@@ -25,6 +25,16 @@ export const sendMessage = mutation({
       );
     }
 
+    const slot = await ctx.db.get(consultation.slotId);
+
+    if (!slot) {
+      throw new Error("Consultation slot not found.");
+    }
+
+    if (Date.now() >= slot.endTime) {
+      throw new Error("This consultation has ended.");
+    }
+
     const consultant = await ctx.db.get(
       consultation.consultantId
     );
@@ -60,27 +70,50 @@ export const sendMessage = mutation({
       }
     );
 
-    // User sent a message → notify consultant
-    if (sender === "user") {
-      await ctx.db.insert("notifications", {
-        recipientId: consultant.clerkId,
-        title: "New consultation message",
-        message: `${consultation.userName} sent you a message.`,
-        type: "consultation_message",
-        link: `/consultant/chat/${args.consultationId}`,
-        isRead: false,
-        createdAt: now,
-      });
-    }
+    const recipientId =
+      sender === "user"
+        ? consultant.clerkId
+        : consultation.userId;
 
-    // Consultant sent a message → notify user
-    if (sender === "consultant") {
+    const activeView = await ctx.db
+      .query("activeConsultationViews")
+      .withIndex("by_clerk_and_consultation", (q) =>
+        q
+          .eq("clerkId", recipientId)
+          .eq("consultationId", args.consultationId)
+      )
+      .first();
+
+    const isRecipientViewingChat =
+      activeView !== null &&
+      now - activeView.updatedAt < 60_000;
+    
+    console.log("MESSAGE PRESENCE DEBUG", {
+      sender,
+      senderClerkId: identity.subject,
+      recipientId,
+      consultationId: args.consultationId,
+      activeView,
+      age:
+        activeView !== null
+          ? now - activeView.updatedAt
+          : null,
+      isRecipientViewingChat,
+    });
+
+    if (!isRecipientViewingChat) {
       await ctx.db.insert("notifications", {
-        recipientId: consultation.userId,
+        recipientId,
         title: "New consultation message",
-        message: `${consultant.fullName} sent you a message.`,
+        message:
+          sender === "user"
+            ? `${consultation.userName} sent you a message.`
+            : `${consultant.fullName} sent you a message.`,
         type: "consultation_message",
-        link: `/consultantchat/${args.consultationId}`,
+        link:
+          sender === "user"
+            ? `/consultant/chat/${args.consultationId}`
+            : `/consultantchat/${args.consultationId}`,
         isRead: false,
         createdAt: now,
       });

@@ -1,7 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
-type ConsultationStatus = "pending" | "active" | "completed";
+type ConsultationStatus = "pending" | "active" | "completed" | "expired";
 
 function transitionConsultation(
   fromStatus: ConsultationStatus,
@@ -45,12 +45,12 @@ function transitionConsultation(
           throw new Error("Consultation slot not found.");
         }
         const now = Date.now();
-        // Consultant can accept up to 10 minutes before the appointment.
+        // Consultant can accept up to 5 minutes before the appointment.
         const earliestAcceptanceTime =
-          slot.startTime - 10 * 60 * 1000;
+          slot.startTime - 5 * 60 * 1000;
         if (now < earliestAcceptanceTime) {
           throw new Error(
-            "This consultation can only be accepted within 10 minutes of the appointment time."
+            "This consultation can only be accepted within 5 minutes of the appointment time."
           );
         }
         if (now > slot.endTime) {
@@ -231,6 +231,255 @@ export const completeConsultation = transitionConsultation(
   "completed",
   "Only an active consultation can be completed."
 );
+
+export const expirePendingConsultation = mutation({
+  args: {
+    consultationId: v.id("consultations"),
+  },
+
+  handler: async (ctx, args) => {
+    const identity =
+      await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error(
+        "You must be signed in."
+      );
+    }
+
+    const consultation =
+      await ctx.db.get(
+        args.consultationId
+      );
+
+    if (!consultation) {
+      throw new Error(
+        "Consultation not found."
+      );
+    }
+
+    const consultant =
+      await ctx.db.get(
+        consultation.consultantId
+      );
+
+    if (!consultant) {
+      throw new Error(
+        "Consultant not found."
+      );
+    }
+
+    const isUser =
+      consultation.userId ===
+      identity.subject;
+
+    const isConsultant =
+      consultant.clerkId ===
+      identity.subject;
+
+    if (!isUser && !isConsultant) {
+      throw new Error(
+        "You do not have permission to update this consultation."
+      );
+    }
+
+    // Nothing to do if it is no longer pending.
+    if (
+      consultation.status !==
+      "pending"
+    ) {
+      return;
+    }
+
+    const slot =
+      await ctx.db.get(
+        consultation.slotId
+      );
+
+    if (!slot) {
+      throw new Error(
+        "Consultation slot not found."
+      );
+    }
+
+    // It has not expired yet.
+    if (
+      Date.now() < slot.endTime
+    ) {
+      return;
+    }
+
+    await ctx.db.patch(
+      args.consultationId,
+      {
+        status: "expired",
+        updatedAt: Date.now(),
+      }
+    );
+  },
+});
+
+export const completeExpiredConsultation = mutation({
+  args: {
+    consultationId: v.id("consultations"),
+  },
+
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error("You must be signed in.");
+    }
+
+    const consultation = await ctx.db.get(
+      args.consultationId
+    );
+
+    if (!consultation) {
+      throw new Error("Consultation not found.");
+    }
+
+    const consultant = await ctx.db.get(
+      consultation.consultantId
+    );
+
+    if (!consultant) {
+      throw new Error("Consultant not found.");
+    }
+
+    // Either participant may trigger the automatic expiry.
+    const isUser =
+      consultation.userId === identity.subject;
+
+    const isConsultant =
+      consultant.clerkId === identity.subject;
+
+    if (!isUser && !isConsultant) {
+      throw new Error(
+        "You do not have permission to update this consultation."
+      );
+    }
+
+    // Already completed — nothing else to do.
+    if (consultation.status === "completed") {
+      return;
+    }
+
+    if (consultation.status !== "active") {
+      return;
+    }
+
+    const slot = await ctx.db.get(
+      consultation.slotId
+    );
+
+    if (!slot) {
+      throw new Error("Consultation slot not found.");
+    }
+
+    // Never allow this mutation to end a consultation early.
+    if (Date.now() < slot.endTime) {
+      return;
+    }
+
+    await ctx.db.patch(args.consultationId, {
+      status: "completed",
+      updatedAt: Date.now(),
+    });
+
+    await ctx.db.insert("notifications", {
+      recipientId: consultation.userId,
+      title: "Consultation completed",
+      message: `Your consultation with ${consultant.fullName} has been completed.`,
+      type: "consultation_status",
+      link: "/consultants/history",
+      isRead: false,
+      createdAt: Date.now(),
+    });
+  },
+});
+
+export const hideExpiredConsultation = mutation({
+  args: {
+    consultationId: v.id("consultations"),
+  },
+
+  handler: async (ctx, args) => {
+    const identity =
+      await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error(
+        "You must be signed in."
+      );
+    }
+
+    const consultation =
+      await ctx.db.get(
+        args.consultationId
+      );
+
+    if (!consultation) {
+      throw new Error(
+        "Consultation not found."
+      );
+    }
+
+    if (
+      consultation.status !==
+      "expired"
+    ) {
+      throw new Error(
+        "Only expired consultations can be removed."
+      );
+    }
+
+    const consultant =
+      await ctx.db.get(
+        consultation.consultantId
+      );
+
+    if (!consultant) {
+      throw new Error(
+        "Consultant not found."
+      );
+    }
+
+    const isUser =
+      consultation.userId ===
+      identity.subject;
+
+    const isConsultant =
+      consultant.clerkId ===
+      identity.subject;
+
+    if (!isUser && !isConsultant) {
+      throw new Error(
+        "You do not have permission to remove this consultation."
+      );
+    }
+
+    if (isUser) {
+      await ctx.db.patch(
+        args.consultationId,
+        {
+          hiddenFromUser: true,
+          updatedAt: Date.now(),
+        }
+      );
+
+      return;
+    }
+
+    await ctx.db.patch(
+      args.consultationId,
+      {
+        hiddenFromConsultant: true,
+        updatedAt: Date.now(),
+      }
+    );
+  },
+});
 
 export const getConsultantUserNotes = query({
   args: {

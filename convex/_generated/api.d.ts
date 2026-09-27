@@ -16,6 +16,7 @@ import type * as chunk from "../chunk.js";
 import type * as consultantAvailability from "../consultantAvailability.js";
 import type * as consultants from "../consultants.js";
 import type * as consultationMessages from "../consultationMessages.js";
+import type * as consultationPresence from "../consultationPresence.js";
 import type * as consultations from "../consultations.js";
 import type * as conversations from "../conversations.js";
 import type * as dashboard from "../dashboard.js";
@@ -43,6 +44,7 @@ declare const fullApi: ApiFromModules<{
   consultantAvailability: typeof consultantAvailability;
   consultants: typeof consultants;
   consultationMessages: typeof consultationMessages;
+  consultationPresence: typeof consultationPresence;
   consultations: typeof consultations;
   conversations: typeof conversations;
   dashboard: typeof dashboard;

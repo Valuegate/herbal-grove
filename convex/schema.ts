@@ -215,8 +215,11 @@ export default defineSchema({
     status: v.union(
       v.literal("pending"),
       v.literal("active"),
-      v.literal("completed")
+      v.literal("completed"),
+      v.literal("expired")
     ),
+    hiddenFromUser: v.optional(v.boolean()),
+    hiddenFromConsultant: v.optional(v.boolean()), 
     journalShared: v.optional(v.boolean()),
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -317,4 +320,15 @@ export default defineSchema({
   })
     .index("by_recipient", ["recipientId"])
     .index("by_recipient_and_read", ["recipientId", "isRead"]),
+
+  activeConsultationViews: defineTable({
+    clerkId: v.string(),
+    consultationId: v.id("consultations"),
+    updatedAt: v.number(),
+  })
+    .index("by_clerk", ["clerkId"])
+    .index("by_clerk_and_consultation", [
+      "clerkId",
+      "consultationId",
+    ]),
 });
