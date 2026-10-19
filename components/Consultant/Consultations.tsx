@@ -8,7 +8,7 @@ export default function ConsultationsPage() {
   const { darkMode } = useUIStateContext();
 
   const [tab, setTab] = useState<
-    "pending" | "active" | "completed"
+    "pending" | "active" | "completed" | "expired"
   >("pending");
 
   return (
@@ -79,6 +79,20 @@ export default function ConsultationsPage() {
           }`}
         >
           Completed
+        </button>
+        <button
+          onClick={() => setTab("expired")}
+          className={`rounded-lg px-5 py-2 text-sm font-medium transition ${
+            tab === "expired"
+              ? darkMode
+                ? "bg-neutral-700 text-white"
+                : "bg-white text-red-700 shadow"
+              : darkMode
+              ? "text-neutral-300 hover:text-white"
+              : "text-gray-600 hover:text-red-700"
+          }`}
+        >
+          Expired
         </button>
       </div>
 

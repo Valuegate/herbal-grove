@@ -193,14 +193,28 @@ function PendingConsultation({
   );
 }
 
-function ConsultationHistoryItem({
-  consultation,
-  darkMode,
-}: {
+function ConsultationHistoryItem({ consultation, darkMode }: {
   consultation: Doc<"consultations">;
   darkMode: boolean;
 }) {
   const { consultant, slot } = useConsultationDetails(consultation);
+
+  const hideExpiredConsultation = useMutation(
+      api.consultations.hideExpiredConsultation
+    );
+
+  const handleRemove = async () => {
+    try {
+      await hideExpiredConsultation({
+        consultationId: consultation._id,
+      });
+    } catch (error) {
+      console.error(
+        "Failed to remove expired consultation:",
+        error
+      );
+    }
+  };
 
   if (!consultant || !slot) return <ItemLoading />;
 
@@ -251,11 +265,50 @@ function ConsultationHistoryItem({
       )}
 
       {consultation.status === "expired" && (
-        <div className={`rounded-lg px-3 py-3 text-xs ${darkMode ? "bg-red-950/20 text-red-300" : "bg-red-50 text-red-700"}`}>
-          <p className="font-semibold">Consultation expired</p>
-          <p className="mt-1 opacity-80">
-            The consultant didn't accept your request before the appointment time ended.
-          </p>
+        <div
+          className={`rounded-lg px-4 py-3 ${
+            darkMode
+              ? "bg-red-950/20"
+              : "bg-red-50"
+          }`}
+        >
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p
+                className={`text-xs font-semibold ${
+                  darkMode
+                    ? "text-red-300"
+                    : "text-red-700"
+                }`}
+              >
+                Consultation expired
+              </p>
+
+              <p
+                className={`mt-1 text-xs leading-5 ${
+                  darkMode
+                    ? "text-red-300/80"
+                    : "text-red-700/80"
+                }`}
+              >
+                The consultant didn't accept
+                your request before the
+                appointment time ended.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleRemove}
+              className={`shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition ${
+                darkMode
+                  ? "border-neutral-700 text-neutral-300 hover:bg-neutral-800"
+                  : "border-gray-300 bg-white text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              Remove
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -272,12 +325,26 @@ export default function ChatConsultant() {
     user ? { userId: user.id } : "skip"
   );
 
-  const pendingConsultations =
-    consultations?.filter((consultation) => consultation.status === "pending") ?? [];
+  const visibleConsultations =
+    consultations?.filter(
+      (consultation) =>
+        consultation.hiddenFromUser !== true
+    ) ?? [];
 
-  const recentConsultations = consultations
-    ? [...consultations].sort((a, b) => b.createdAt - a.createdAt).slice(0, 3)
-    : [];
+  const pendingConsultations =
+    visibleConsultations.filter(
+      (consultation) =>
+        consultation.status === "pending"
+    );
+
+  const recentConsultations = [
+    ...visibleConsultations,
+  ]
+    .sort(
+      (a, b) =>
+        b.createdAt - a.createdAt
+    )
+    .slice(0, 3);
 
   const headingClass = darkMode ? "text-white" : "text-black";
   const mutedClass = darkMode ? "text-neutral-300" : "text-neutral-700";
@@ -420,7 +487,7 @@ export default function ChatConsultant() {
         <div className={listClass}>
           {consultations === undefined ? (
             <StatusMessage darkMode={darkMode} text="Loading consultations..." />
-          ) : consultations.length === 0 ? (
+          ) : visibleConsultations.length === 0 ? (
             <StatusMessage darkMode={darkMode} text="You haven't booked a consultation yet." />
           ) : (
             recentConsultations.map((consultation) => (

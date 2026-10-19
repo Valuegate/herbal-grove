@@ -265,3 +265,102 @@ export const deleteDocument = mutation({
     await ctx.db.delete(args.id);
   },
 });
+
+// Get a source by name
+export const getSourceByName = query({
+  args: {
+    name: v.string(),
+  },
+
+  handler: async (ctx, args) => {
+    const sources = await ctx.db
+      .query("sources")
+      .collect();
+
+    const normalizedName =
+      args.name.trim().toLowerCase();
+
+    return (
+      sources.find(
+        (source) =>
+          source.name.trim().toLowerCase() ===
+          normalizedName
+      ) ?? null
+    );
+  },
+});
+
+// Create a source
+export const createSource = mutation({
+  args: {
+    name: v.string(),
+    type: v.union(
+      v.literal("journal"),
+      v.literal("research_institute"),
+      v.literal("government"),
+      v.literal("traditional"),
+      v.literal("other")
+    ),
+    url: v.optional(v.string()),
+    description: v.optional(v.string()),
+  },
+
+  handler: async (ctx, args) => {
+    const now = Date.now();
+
+    return await ctx.db.insert("sources", {
+      name: args.name.trim(),
+      type: args.type,
+      url: args.url,
+      description: args.description,
+      createdAt: now,
+      updatedAt: now,
+    });
+  },
+});
+
+// Check whether a document is already linked to a source
+export const getDocumentSource = query({
+  args: {
+    documentId: v.id("documents"),
+    sourceId: v.id("sources"),
+  },
+
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("documentSources")
+      .withIndex(
+        "by_document_and_source",
+        (q) =>
+          q
+            .eq(
+              "documentId",
+              args.documentId
+            )
+            .eq(
+              "sourceId",
+              args.sourceId
+            )
+      )
+      .unique();
+  },
+});
+
+// Link a document to a source
+export const linkDocumentToSource = mutation({
+  args: {
+    documentId: v.id("documents"),
+    sourceId: v.id("sources"),
+  },
+
+  handler: async (ctx, args) => {
+    return await ctx.db.insert(
+      "documentSources",
+      {
+        documentId: args.documentId,
+        sourceId: args.sourceId,
+        createdAt: Date.now(),
+      }
+    );
+  },
+});

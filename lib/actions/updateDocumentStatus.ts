@@ -14,7 +14,6 @@ export async function updateDocumentStatus(
     | "pending"
     | "approved"
     | "rejected"
-    | "outdated"
 ) {
   await convex.mutation(
     api.documents.updateVerificationStatus,

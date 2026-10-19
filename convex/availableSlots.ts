@@ -1,6 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { MutationCtx } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
 
 const APP_TIME_ZONE = "Africa/Lagos";
@@ -243,12 +244,13 @@ export const bookConsultation = mutation({
 
     await assertNoConflictingConsultation(ctx, userId, args.consultantId);
 
-    const { slotId } = await validateAndBookSlot(
+    const { slotId, endTime } = await validateAndBookSlot(
       ctx,
       args.consultantId,
       args.startTime,
       args.durationMinutes ?? 30
     );
+    
 
     const now = Date.now();
     const consultationId = await ctx.db.insert("consultations", {
@@ -262,6 +264,13 @@ export const bookConsultation = mutation({
       createdAt: now,
       updatedAt: now,
     });
+    await ctx.scheduler.runAt(
+      endTime,
+      internal.consultations.expirePendingConsultationScheduled,
+      {
+        consultationId,
+      }
+    );
 
     await notifyConsultant(
       ctx,

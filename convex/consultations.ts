@@ -1,4 +1,4 @@
-import { mutation, query } from "./_generated/server";
+import { internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 type ConsultationStatus = "pending" | "active" | "completed" | "expired";
@@ -91,82 +91,6 @@ function transitionConsultation(
     },
   });
 }
-
-// Create a consultation request from a booked slot
-export const createConsultation = mutation({
-  args: {
-    userId: v.string(),
-    userName: v.string(),
-    userEmail: v.string(),
-    consultantId: v.id("consultants"),
-    slotId: v.id("availableSlots"),
-    initialMessage: v.string(),
-  },
-
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-
-    if (!identity) {
-      throw new Error("You must be signed in.");
-    }
-    const userId = identity.subject;
-    const consultations = await ctx.db
-      .query("consultations")
-      .withIndex("by_user_consultant", (q) =>
-        q.eq("userId", userId).eq("consultantId", args.consultantId)
-      )
-      .collect();
-
-    const existing = consultations.find(
-      (consultation) => consultation.status === "pending" || consultation.status === "active"
-    );
-
-    if (existing) {
-      throw new Error("You already have an active consultation with this consultant.");
-    }
-
-    const slot = await ctx.db.get(args.slotId);
-    if (!slot) throw new Error("This consultation slot no longer exists.");
-    if (slot.consultantId !== args.consultantId) {
-      throw new Error("This slot does not belong to this consultant.");
-    }
-    if (slot.status !== "available") {
-      throw new Error("This consultation slot has already been booked.");
-    }
-
-    const consultationId = await ctx.db.insert("consultations", {
-      userId,
-      userName: args.userName,
-      userEmail: args.userEmail,
-      consultantId: args.consultantId,
-      slotId: args.slotId,
-      initialMessage: args.initialMessage,
-      status: "pending",
-      journalShared: false,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-    });
-
-    await ctx.db.patch(args.slotId, { status: "booked", updatedAt: Date.now() });
-
-    const consultant = await ctx.db.get(args.consultantId);
-    if (!consultant) {
-      throw new Error("Consultant not found.");
-    }
-
-    await ctx.db.insert("notifications", {
-      recipientId: consultant.clerkId,
-      title: "New consultation request",
-      message: `${args.userName} booked a consultation with you.`,
-      type: "consultation_booking",
-      link: `/consultant/chat/${consultationId}`,
-      isRead: false,
-      createdAt: Date.now(),
-    });
-
-    return consultationId;
-  },
-});
 
 // Get a consultation with consultant + slot details
 export const getConsultation = query({
@@ -306,6 +230,55 @@ export const expirePendingConsultation = mutation({
     if (
       Date.now() < slot.endTime
     ) {
+      return;
+    }
+
+    await ctx.db.patch(
+      args.consultationId,
+      {
+        status: "expired",
+        updatedAt: Date.now(),
+      }
+    );
+  },
+});
+
+export const expirePendingConsultationScheduled = internalMutation({
+  args: {
+    consultationId:
+      v.id("consultations"),
+  },
+
+  handler: async (ctx, args) => {
+    const consultation =
+      await ctx.db.get(
+        args.consultationId
+      );
+
+    if (!consultation) {
+      return;
+    }
+
+    // Only missed pending requests expire.
+    // If it was accepted, this scheduled
+    // job becomes a harmless no-op.
+    if (
+      consultation.status !==
+      "pending"
+    ) {
+      return;
+    }
+
+    const slot = await ctx.db.get(
+      consultation.slotId
+    );
+
+    if (!slot) {
+      return;
+    }
+
+    // Safety check: never expire early.
+    if (Date.now() < slot.endTime) {
       return;
     }
 

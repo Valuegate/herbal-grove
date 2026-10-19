@@ -1,13 +1,8 @@
 import { MessageSquare } from "lucide-react";
-import { Id } from "@/convex/_generated/dataModel";
+import { Doc } from "@/convex/_generated/dataModel";
 
 interface Props {
-  consultations: {
-    _id: Id<"consultations">;
-    status: "pending" | "active" | "completed";
-    createdAt: number;
-    initialMessage: string;
-  }[];
+  consultations: Doc<"consultations">[];
   darkMode: boolean;
 }
 

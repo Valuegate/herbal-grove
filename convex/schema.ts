@@ -154,6 +154,17 @@ export default defineSchema({
     ),
   }).index("by_document", ["documentId"]),
 
+  researchChunks: defineTable({
+    discoveryId: v.id("researchDiscoveries"),
+    chunkIndex: v.number(),
+    text: v.string(),
+    embedding: v.array(v.number()),
+    isApproved: v.boolean(),
+    createdAt: v.number(),
+  })
+    .index("by_discovery", ["discoveryId"])
+    .index("by_approved", ["isApproved"]),
+
   //Consultants
   consultants: defineTable({
     clerkId: v.string(),
@@ -299,7 +310,8 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index("by_status", ["status"])
-    .index("by_source", ["source"]),
+    .index("by_source", ["source"])
+    .index("by_source_url", ["sourceUrl"]),
 
   // Notifications
   notifications: defineTable({

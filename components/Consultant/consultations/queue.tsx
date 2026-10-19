@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
-import { useQuery } from "convex/react";
+import { useMemo, useEffect } from "react";
+import { useQuery, useMutation } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 
 import { api } from "@/convex/_generated/api";
@@ -9,12 +9,13 @@ import { useUIStateContext } from "@/components/UIStateContext";
 import ConsultationCard from "./consultationCards";
 
 interface Props {
-  tab: "pending" | "active" | "completed";
+  tab: "pending" | "active" | "completed" | "expired";
 }
 
 export default function ConsultationQueue({ tab }: Props) {
   const { darkMode } = useUIStateContext();
   const { user } = useUser();
+  const expirePendingConsultation =useMutation(api.consultations.expirePendingConsultation);
 
   const consultant = useQuery(
     api.consultants.getCurrentConsultant,
@@ -28,11 +29,44 @@ export default function ConsultationQueue({ tab }: Props) {
       : "skip"
   );
 
+  useEffect(() => {
+    if (!consultations) return;
+
+    const expireMissedConsultations =
+      async () => {
+        for (const consultation of consultations) {
+          if (
+            consultation.status !==
+            "pending"
+          ) {
+            continue;
+          }
+
+          try {
+            await expirePendingConsultation({
+              consultationId:
+                consultation._id,
+            });
+          } catch (error) {
+            console.error(
+              "Failed to expire pending consultation:",
+              error
+            );
+          }
+        }
+      };
+
+    void expireMissedConsultations();
+  }, [
+    consultations,
+    expirePendingConsultation,
+  ]);
+  
   const filteredConsultations = useMemo(() => {
     if (!consultations) return [];
 
     return consultations.filter(
-      (consultation) => consultation.status === tab
+      (consultation) => consultation.status === tab && consultation.hiddenFromConsultant !== true
     );
   }, [consultations, tab]);
 

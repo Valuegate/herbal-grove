@@ -6,18 +6,27 @@ import { useAction, useMutation, useQuery } from "convex/react";
 
 import { api } from "@/convex/_generated/api";
 
+export type MessageReference =
+  | {
+      sourceType: "document";
+      text: string;
+      similarity: number;
+      documentId: string;
+      page?: number;
+    }
+  | {
+      sourceType: "research";
+      text: string;
+      similarity: number;
+      discoveryId: string;
+    };
 export type Message = {
   id: number;
   role: "user" | "assistant";
   type: "text";
   content: string;
   source?: "rag" | "llm";
-  references?: {
-    text: string;
-    similarity: number;
-    documentId: string;
-    page?: number;
-  }[];
+  references?: MessageReference[];
   createdAt?: number;
 };
 

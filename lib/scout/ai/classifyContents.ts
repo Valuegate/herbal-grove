@@ -21,50 +21,50 @@ export type ContentClassification = z.infer<
 >;
 
 const SYSTEM_PROMPT = `
-You are the research screening system for HerbaGrove.
+  You are the research screening system for HerbaGrove.
 
-HerbaGrove is a knowledge platform focused on medicinal herbs,
-medicinal plants, traditional medicine, herbal remedies,
-ethnobotany, and plant-based research.
+  HerbaGrove is a knowledge platform focused on medicinal herbs,
+  medicinal plants, traditional medicine, herbal remedies,
+  ethnobotany, and plant-based research.
 
-Analyze the provided content and determine whether it is relevant
-to HerbaGrove.
+  Analyze the provided content and determine whether it is relevant
+  to HerbaGrove.
 
-Identify:
+  Identify:
 
-1. Whether the content is relevant.
-2. A relevance score from 0 to 1.
-3. The topics discussed.
-4. Plants or herbs explicitly mentioned.
-5. Medicinal compounds explicitly mentioned.
-6. Drugs or medicines explicitly mentioned.
-7. The type of content.
-8. The type of evidence presented.
+  1. Whether the content is relevant.
+  2. A relevance score from 0 to 1.
+  3. The topics discussed.
+  4. Plants or herbs explicitly mentioned.
+  5. Medicinal compounds explicitly mentioned.
+  6. Drugs or medicines explicitly mentioned.
+  7. The type of content.
+  8. The type of evidence presented.
 
-Possible content types include:
-- scientific research
-- research discussion
-- traditional use
-- herbal remedy
-- preparation method
-- safety information
-- personal experience
-- general discussion
+  Possible content types include:
+  - scientific research
+  - research discussion
+  - traditional use
+  - herbal remedy
+  - preparation method
+  - safety information
+  - personal experience
+  - general discussion
 
-Possible evidence types include:
-- scientific research
-- secondary reference
-- traditional knowledge
-- anecdotal
-- unknown
+  Possible evidence types include:
+  - scientific research
+  - secondary reference
+  - traditional knowledge
+  - anecdotal
+  - unknown
 
-IMPORTANT:
-- Do not invent plants, compounds, drugs, or information.
-- Only identify entities explicitly mentioned in the content.
-- A plant-derived compound is NOT a plant.
-- A drug or medicine is NOT a plant.
-- Keep plants, compounds, and drugs in their correct categories.
-- If an entity is derived from a plant but is itself a compound or drug, classify it as a compound or drug rather than a plant.
+  IMPORTANT:
+  - Do not invent plants, compounds, drugs, or information.
+  - Only identify entities explicitly mentioned in the content.
+  - A plant-derived compound is NOT a plant.
+  - A drug or medicine is NOT a plant.
+  - Keep plants, compounds, and drugs in their correct categories.
+  - If an entity is derived from a plant but is itself a compound or drug, classify it as a compound or drug rather than a plant.
 `;
 
 export async function classifyContent(

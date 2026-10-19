@@ -3,19 +3,11 @@
 import MessageBubble from "./MessageBubble";
 import TypingIndicator from "./TypingIndicator";
 import { useUIStateContext } from "@/components/UIStateContext";
+import { Message } from "./usechatbox";
 
-interface Message {
-  id: number;
-  role: "user" | "assistant";
-  content: string;
-  createdAt?: number;
-  source?: "rag" | "llm";
-  references?: {
-    text: string;
-    similarity: number;
-    documentId: string;
-    page?: number;
-  }[]
+interface Props {
+  messages: Message[];
+  isSending: boolean;
 }
 
 interface Props {

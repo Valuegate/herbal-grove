@@ -158,7 +158,7 @@ export const searchChunks = query({
     );
 
     return sorted
-      .filter((chunk) => chunk.similarity >= 0.8)
+      .filter((chunk) => chunk.similarity >= 0.65)
       .slice(0, args.limit ?? 5);
   },
 });

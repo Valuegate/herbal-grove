@@ -26,6 +26,7 @@ import type * as herbs from "../herbs.js";
 import type * as messages from "../messages.js";
 import type * as notifications from "../notifications.js";
 import type * as research from "../research.js";
+import type * as researchChunks from "../researchChunks.js";
 import type * as researchDiscoveries from "../researchDiscoveries.js";
 import type * as saveDocuments from "../saveDocuments.js";
 
@@ -54,6 +55,7 @@ declare const fullApi: ApiFromModules<{
   messages: typeof messages;
   notifications: typeof notifications;
   research: typeof research;
+  researchChunks: typeof researchChunks;
   researchDiscoveries: typeof researchDiscoveries;
   saveDocuments: typeof saveDocuments;
 }>;

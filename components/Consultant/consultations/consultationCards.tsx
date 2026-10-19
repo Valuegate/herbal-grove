@@ -6,23 +6,13 @@ import { Clock3, MoreVertical, CalendarDays, MessageSquare } from "lucide-react"
 
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { Doc } from "@/convex/_generated/dataModel";
 import { Id } from "@/convex/_generated/dataModel";
 
 import { useUIStateContext } from "@/components/UIStateContext";
 
 interface ConsultationCardProps {
-  consultation: {
-    _id: Id<"consultations">;
-    userId: string;
-    userName: string;
-    userEmail: string;
-    consultantId: Id<"consultants">;
-    slotId: Id<"availableSlots">;
-    initialMessage: string;
-    createdAt: number;
-    updatedAt: number;
-    status: "pending" | "active" | "completed";
-  };
+  consultation: Doc<"consultations">
 }
 
 const STATUS_META = {
@@ -40,7 +30,13 @@ const STATUS_META = {
     label: "Completed", 
     badgeClass: "bg-blue-100 text-blue-700", 
     buttonLabel: "View Consultation"
-  }
+  },
+  expired: {
+    label: "Expired",
+    badgeClass:
+      "bg-red-100 text-red-700",
+    buttonLabel: "Remove",
+  },
 } as const;
 
 function formatDate(timestamp: number) {
@@ -70,10 +66,13 @@ export default function ConsultationCard({ consultation }: ConsultationCardProps
   
   const router = useRouter();
   const acceptConsultation = useMutation(api.consultations.acceptConsultation);
+  const hideExpiredConsultation = useMutation(api.consultations.hideExpiredConsultation);
   const slot = useQuery(api.availableSlots.getSlotById, { slotId: consultation.slotId });
 
   const isPending = consultation.status === "pending";
   const isActive = consultation.status === "active";
+  const isExpired = consultation.status === "expired";
+
   const earliestAcceptanceTime = slot
     ? slot.startTime - 5 * 60 * 1000
     : null;
@@ -105,17 +104,32 @@ export default function ConsultationCard({ consultation }: ConsultationCardProps
 
   async function handleConsultation() {
     try {
+      if (isExpired) {
+        await hideExpiredConsultation({
+          consultationId:
+            consultation._id,
+        });
+
+        return;
+      }
+
       if (isPending) {
         if (!canAccept) return;
 
         await acceptConsultation({
-          consultationId: consultation._id,
+          consultationId:
+            consultation._id,
         });
       }
 
-      router.push(`/consultant/chat/${consultation._id}`);
+      router.push(
+        `/consultant/chat/${consultation._id}`
+      );
     } catch (error) {
-      console.error("Failed to update consultation:", error);
+      console.error(
+        "Failed to update consultation:",
+        error
+      );
     }
   }
 
@@ -215,30 +229,73 @@ export default function ConsultationCard({ consultation }: ConsultationCardProps
         </div>
       )}
 
+      {isExpired && (
+        <div
+          className={`mt-4 rounded-xl px-4 py-3 ${
+            darkMode
+              ? "bg-red-950/20"
+              : "bg-red-50"
+          }`}
+        >
+          <p
+            className={`text-sm font-semibold ${
+              darkMode
+                ? "text-red-300"
+                : "text-red-700"
+            }`}
+          >
+            Consultation expired
+          </p>
+
+          <p
+            className={`mt-1 text-xs leading-5 ${
+              darkMode
+                ? "text-red-300/80"
+                : "text-red-700/80"
+            }`}
+          >
+            This consultation wasn't accepted before the appointment time ended.
+          </p>
+        </div>
+      )}
       {/* Action */}
       <div className="mt-5 flex justify-end">
-        <button
-          type="button"
-          onClick={handleConsultation}
-          disabled={isPending && !canAccept}
-          className={
-            isPending && !canAccept
-              ? `cursor-not-allowed rounded-full px-6 py-2.5 text-sm font-semibold ${
-                  darkMode
-                    ? "bg-neutral-800 text-neutral-500"
-                    : "bg-gray-200 text-gray-400"
-                }`
-              : isPending || isActive
-                ? "rounded-full bg-green-700 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800"
-                : `rounded-full border px-6 py-2.5 text-sm font-semibold ${
+        {isExpired ? (
+          <button
+            type="button"
+            onClick={handleConsultation}
+            className={`rounded-full border px-6 py-2.5 text-sm font-semibold transition ${
+              darkMode
+                ? "border-red-900/60 text-red-300 hover:bg-red-950/30"
+                : "border-red-200 text-red-700 hover:bg-red-50"
+            }`}
+          >
+            Remove
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleConsultation}
+            disabled={isPending && !canAccept}
+            className={
+              isPending && !canAccept
+                ? `cursor-not-allowed rounded-full px-6 py-2.5 text-sm font-semibold ${
                     darkMode
-                      ? "border-neutral-700 text-neutral-300 hover:bg-neutral-800"
-                      : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                      ? "bg-neutral-800 text-neutral-500"
+                      : "bg-gray-200 text-gray-400"
                   }`
-          }
-        >
-          {STATUS_META[consultation.status].buttonLabel}
-        </button>
+                : isPending || isActive
+                  ? "rounded-full bg-green-700 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-green-800"
+                  : `rounded-full border px-6 py-2.5 text-sm font-semibold ${
+                      darkMode
+                        ? "border-neutral-700 text-neutral-300 hover:bg-neutral-800"
+                        : "border-gray-200 text-gray-600 hover:bg-gray-50"
+                    }`
+            }
+          >
+            {STATUS_META[consultation.status].buttonLabel}
+          </button>
+        )}
       </div>
     </div>
   );

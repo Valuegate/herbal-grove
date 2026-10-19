@@ -1,63 +1,23 @@
 import { NextResponse } from "next/server";
-import { ConvexHttpClient } from "convex/browser";
 
-import { api } from "@/convex/_generated/api";
-import { discoverWebPage } from "@/lib/scout/sources/web";
-import { classifyContent } from "@/lib/scout/ai/classifyContents";
+import { runScout } from "@/lib/scout/runScout";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-
-export async function POST(request: Request) {
+export async function POST() {
   try {
-    const { url } = await request.json();
-
-    if (!url) {
-      return NextResponse.json(
-        { error: "URL is required." },
-        { status: 400 }
-      );
-    }
-
-    const discovered = await discoverWebPage(url);
-
-    const classification = await classifyContent(discovered.content);
-
-    const discoveryId = await convex.mutation(
-      api.researchDiscoveries.createDiscovery,
-      {
-        source: discovered.source,
-        sourceUrl: discovered.sourceUrl,
-        sourceId: discovered.sourceId,
-
-        title: discovered.title,
-        content: discovered.content,
-
-        author: discovered.author,
-        publishedAt: discovered.publishedAt,
-        discoveredAt: Date.now(),
-
-        topics: classification.topics,
-        plants: classification.plants,
-
-        contentType: classification.contentType,
-        evidenceType: classification.evidenceType,
-        relevanceScore: classification.relevanceScore,
-
-        images: discovered.images,
-      }
-    );
+    const result = await runScout();
 
     return NextResponse.json({
-      discoveryId,
-      discovered,
-      classification,
+      success: true,
+      message: "Research Scout crawl completed.",
+      result,
     });
   } catch (error) {
-    console.error("Scout discovery failed:", error);
+    console.error("Research Scout crawl failed:", error);
 
     return NextResponse.json(
       {
-        error: "Scout discovery failed.",
+        success: false,
+        error: "Research Scout crawl failed.",
         details:
           error instanceof Error
             ? error.message

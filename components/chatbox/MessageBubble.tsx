@@ -1,6 +1,7 @@
 "use client";
 
 import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
+import { MessageReference } from "./usechatbox";
 
 interface MessageBubbleProps {
   role: "user" | "assistant";
@@ -8,12 +9,7 @@ interface MessageBubbleProps {
   createdAt?: number;
   source?: "rag" | "llm";
 
-  references?: {
-    text: string;
-    similarity: number;
-    documentId: string;
-    page?: number;
-  }[];
+  references?: MessageReference[];
 }
 
 export default function MessageBubble({

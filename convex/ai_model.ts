@@ -9,12 +9,20 @@ import { generateEmbedding } from "../lib/embeddings/generateEmbeddings";
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 const MODEL = "openai/gpt-oss-safeguard-20b";
-type Reference = {
-  text: string;
-  similarity: number;
-  documentId: Id<"documents">;
-  page?: number;
-};
+type Reference =
+  | {
+      sourceType: "document";
+      text: string;
+      similarity: number;
+      documentId: Id<"documents">;
+      page?: number;
+    }
+  | {
+      sourceType: "research";
+      text: string;
+      similarity: number;
+      discoveryId: Id<"researchDiscoveries">;
+    };
 
 type SendMessageResponse = {
   answer: string;
@@ -86,9 +94,40 @@ export const sendMessage = action({
   handler: async (ctx, args): Promise<SendMessageResponse> => {
     try {
       const embedding = await generateEmbedding(args.message)
-      const chunks = await ctx.runQuery(api.chunk.searchChunks, {embedding, limit: 5});
+      const [documentChunks, scoutChunks] =
+        await Promise.all([
+          ctx.runQuery(
+            api.chunk.searchChunks,
+            {
+              embedding,
+              limit: 4,
+            }
+          ),
 
-      if (chunks.length > 0 && chunks[0].similarity >= 0.8) {
+          ctx.runQuery(
+            api.researchChunks.searchApprovedResearchChunks,
+            {
+              embedding,
+              limit: 3,
+            }
+          ),
+        ]);
+
+      const chunks = [
+        ...documentChunks.map((chunk) => ({
+          ...chunk,
+          sourceType: "document" as const,
+        })),
+
+        ...scoutChunks.map((chunk) => ({
+          ...chunk,
+          sourceType: "research" as const,
+        })),
+      ].sort(
+        (a, b) =>
+          b.similarity - a.similarity
+      );
+      if (chunks.length > 0) {
         const context = buildContext(chunks);
         const ragAnswer = await askGroq(RAG_SYSTEM_PROMPT(context), args.message);
 
@@ -97,6 +136,14 @@ export const sendMessage = action({
         }
       }
 
+      console.log(
+        "CHAT RAG RESULTS:",
+        chunks.map((chunk) => ({
+          sourceType: chunk.sourceType,
+          similarity: chunk.similarity,
+          text: chunk.text.slice(0, 100),
+        }))
+      );
       const llmAnswer = await askGroq(GENERAL_SYSTEM_PROMPT, args.message);
       return { answer: llmAnswer, source: "llm" as const, references: [] };
     } catch (error) {
