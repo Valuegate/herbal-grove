@@ -14,7 +14,49 @@ type FormFields = {
   confirmPassword: string;
 };
 
+type OAuthStrategy = "oauth_google" | "oauth_facebook";
+
+const inputStyle =
+  "w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-green focus:border-transparent outline-none transition-all text-black text-sm";
+
+// Where the OAuth provider redirect lands to finish the flow.
+const SSO_CALLBACK_URL = "/sso-callback";
+// Where the user goes once sign-up is fully complete — routes through
+// the same role/password-check logic as login, for both OAuth and
+// password sign-up.
+const POST_SIGNUP_URL = "/redirect";
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return <p className="text-red-500 text-xs">{message}</p>;
+}
+
+function getSignUpErrorMessage(error: any): string {
+  const code = error?.code;
+  switch (code) {
+    case "form_identifier_exists":
+    case "identifier_already_exists":
+      return "An account with that email already exists.";
+    case "form_password_pwned":
+      return "That password has appeared in a data breach. Please choose another.";
+    case "form_password_length_too_short":
+      return "Password is too short.";
+    case "captcha_invalid":
+    case "captcha_missing_token":
+      return "Captcha validation failed. Please try again.";
+    default:
+      return error?.longMessage || error?.message || "Unable to create account.";
+  }
+}
+
 export const SignUpForm = () => {
+  const router = useRouter();
+  const { signUp, fetchStatus } = useSignUp();
+
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   const {
     register,
     handleSubmit,
@@ -22,41 +64,64 @@ export const SignUpForm = () => {
     formState: { errors, isSubmitting },
   } = useForm<FormFields>();
 
-  const router = useRouter();
-  const { signUp, fetchStatus } = useSignUp();
-  const [apiError, setApiError] = useState<string | null>(null);
+  const handleOAuthSignUp = async (strategy: OAuthStrategy) => {
+    if (fetchStatus === "fetching") return;
+
+    setApiError(null);
+
+    try {
+      const { error } = await signUp.sso({
+        strategy,
+        redirectUrl: POST_SIGNUP_URL,
+        redirectCallbackUrl: SSO_CALLBACK_URL,
+      });
+
+      if (error) {
+        setApiError(getSignUpErrorMessage(error));
+      }
+    } catch (error) {
+      setApiError(
+        error instanceof Error ? error.message : "Unable to continue with that provider."
+      );
+    }
+  };
 
   const onSubmit: SubmitHandler<FormFields> = async (data) => {
-  if (fetchStatus === "fetching") return;
+    if (fetchStatus === "fetching") return;
 
-  setApiError(null);
+    setApiError(null);
 
-  const [firstName, lastName] = data.fullname.trim().split(/\s+/, 2);
+    const [firstName, lastName] = data.fullname.trim().split(/\s+/, 2);
 
-  const { error } = await signUp.create({
-    emailAddress: data.email,
-    password: data.password,
-    firstName,
-    lastName,
-  });
+    const { error } = await signUp.password({
+      emailAddress: data.email,
+      password: data.password,
+      firstName,
+      lastName,
+    });
 
+    if (error) {
+      setApiError(getSignUpErrorMessage(error));
+      return;
+    }
 
-  if (error) {
-    setApiError(error.longMessage || error.message);
-    return;
-  }
+    if (signUp.status !== "complete") {
+      // Most commonly this means email/phone verification is required
+      // before the account can be finalized. Route the user to whatever
+      // verification step your app uses; adjust as needed.
+      router.push("/verify-email");
+      return;
+    }
 
-  // ONLY redirect if creation succeeded
-  router.push("/dashboard");
-};
+    const { error: finalizeError } = await signUp.finalize();
 
-  // Common input style
-  const inputStyle =
-    "w-full px-4 py-2.5 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-green focus:border-transparent outline-none transition-all text-black text-sm";
+    if (finalizeError) {
+      setApiError(getSignUpErrorMessage(finalizeError));
+      return;
+    }
 
-  // Password display states
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    router.push(POST_SIGNUP_URL);
+  };
 
   return (
     <div className="w-full">
@@ -69,22 +134,27 @@ export const SignUpForm = () => {
       <div className="grid grid-cols-2 gap-4 mb-6">
         <button
           type="button"
-          className="flex items-center justify-center gap-2 bg-[#f5f5f5] hover:bg-gray-200 text-black py-2.5 rounded-lg text-xs font-semibold transition-colors border border-gray-200"
+          onClick={() => handleOAuthSignUp("oauth_google")}
+          disabled={fetchStatus === "fetching"}
+          className="flex items-center justify-center gap-2 bg-[#f5f5f5] hover:bg-gray-200 text-black py-2.5 rounded-lg text-xs font-semibold transition-colors border border-gray-200 disabled:opacity-50"
         >
           <GoogleIcon className="w-4 h-4" /> Google
         </button>
+
         <button
           type="button"
-          className="flex items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white py-2.5 rounded-lg text-xs font-semibold transition-colors"
+          onClick={() => handleOAuthSignUp("oauth_facebook")}
+          disabled={fetchStatus === "fetching"}
+          className="flex items-center justify-center gap-2 bg-[#1877F2] hover:bg-[#166FE5] text-white py-2.5 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
         >
           <FacebookIcon className="w-4 h-4" /> Facebook
         </button>
       </div>
 
       <div className="flex items-center gap-3 mb-6">
-        <div className="flex-1 h-px bg-gray-200"></div>
+        <div className="flex-1 h-px bg-gray-200" />
         <span className="text-gray-400 text-xs uppercase">or</span>
-        <div className="flex-1 h-px bg-gray-200"></div>
+        <div className="flex-1 h-px bg-gray-200" />
       </div>
 
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
@@ -97,9 +167,7 @@ export const SignUpForm = () => {
             placeholder="John Doe"
             className={inputStyle}
           />
-          {errors.fullname && (
-            <p className="text-red-500 text-xs">{errors.fullname.message}</p>
-          )}
+          <FieldError message={errors.fullname?.message} />
         </div>
 
         {/* Email */}
@@ -114,9 +182,7 @@ export const SignUpForm = () => {
             placeholder="john@example.com"
             className={inputStyle}
           />
-          {errors.email && (
-            <p className="text-red-500 text-xs">{errors.email.message}</p>
-          )}
+          <FieldError message={errors.email?.message} />
         </div>
 
         {/* Password */}
@@ -135,31 +201,22 @@ export const SignUpForm = () => {
               />
               <button
                 type="button"
-                onClick={() => setShowPassword(!showPassword)}
+                onClick={() => setShowPassword((v) => !v)}
                 className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
               >
-                {showPassword ? (
-                  <EyeIcon className="w-4 h-4" />
-                ) : (
-                  <EyeSlashIcon className="w-4 h-4" />
-                )}
+                {showPassword ? <EyeIcon className="w-4 h-4" /> : <EyeSlashIcon className="w-4 h-4" />}
               </button>
             </div>
-            {errors.password && (
-              <p className="text-red-500 text-xs">{errors.password.message}</p>
-            )}
+            <FieldError message={errors.password?.message} />
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-bold text-gray-700">
-              Confirm Password
-            </label>
+            <label className="text-xs font-bold text-gray-700">Confirm Password</label>
             <div className="relative">
               <input
                 {...register("confirmPassword", {
                   required: "Please confirm password",
-                  validate: (val) =>
-                    val === getValues("password") || "Passwords do not match"
+                  validate: (val) => val === getValues("password") || "Passwords do not match",
                 })}
                 type={showConfirmPassword ? "text" : "password"}
                 placeholder="••••••••"
@@ -167,67 +224,41 @@ export const SignUpForm = () => {
               />
               <button
                 type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                onClick={() => setShowConfirmPassword((v) => !v)}
                 className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
               >
-                {showConfirmPassword ? (
-                  <EyeIcon className="w-4 h-4" />
-                ) : (
-                  <EyeSlashIcon className="w-4 h-4" />
-                )}
+                {showConfirmPassword ? <EyeIcon className="w-4 h-4" /> : <EyeSlashIcon className="w-4 h-4" />}
               </button>
             </div>
-            {errors.confirmPassword && (
-              <p className="text-red-500 text-xs">
-                {errors.confirmPassword.message}
-              </p>
-            )}
+            <FieldError message={errors.confirmPassword?.message} />
           </div>
         </div>
 
         <div className="flex items-center gap-2 py-2">
-          <input
-            type="checkbox"
-            id="terms"
-            required
-            className="w-4 h-4 accent-[#1a7a1e]"
-          />
-          <label
-            htmlFor="terms"
-            className="text-sm text-gray-500 leading-tight"
-          >
+          <input type="checkbox" id="terms" required className="w-4 h-4 accent-[#1a7a1e]" />
+          <label htmlFor="terms" className="text-sm text-gray-500 leading-tight">
             I agree to the{" "}
-            <span className="text-[#1a7a1e] underline cursor-pointer">
-              Terms of Service
-            </span>{" "}
-            and{" "}
-            <span className="text-[#1a7a1e] underline cursor-pointer">
-              Privacy Policy
-            </span>
-            .
+            <span className="text-[#1a7a1e] underline cursor-pointer">Terms of Service</span> and{" "}
+            <span className="text-[#1a7a1e] underline cursor-pointer">Privacy Policy</span>.
           </label>
         </div>
-        
+
         {/* Clerk's CAPTCHA widget */}
         <div id="clerk-captcha" data-cl-theme="dark" data-cl-size="flexible" data-cl-language="en-us" />
+
         <button
-          disabled={isSubmitting}
+          disabled={isSubmitting || fetchStatus === "fetching"}
           type="submit"
           className="w-full bg-[#1a7a1e] hover:bg-[#155d17] text-white font-bold py-3 rounded-lg shadow-lg transition-all active:scale-95 disabled:opacity-50"
         >
           {isSubmitting ? "Creating Account..." : "Create Account"}
         </button>
 
-        {apiError && (
-          <p className="text-center text-red-500 text-xs mt-2">{apiError}</p>
-        )}
+        {apiError && <p className="text-center text-red-500 text-xs mt-2">{apiError}</p>}
 
         <p className="text-center text-xs text-gray-600 mt-4">
           Already have an account?{" "}
-          <Link
-            href="/login"
-            className="text-[#1a7a1e] font-bold hover:underline"
-          >
+          <Link href="/login" className="text-[#1a7a1e] font-bold hover:underline">
             Login
           </Link>
         </p>

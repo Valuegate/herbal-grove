@@ -10,7 +10,7 @@ export default async function AdminLayout({
   const { userId } = await auth();
 
   if (!userId) {
-    redirect("/sign-in");
+    redirect("/login");
   }
 
   const client = await clerkClient();

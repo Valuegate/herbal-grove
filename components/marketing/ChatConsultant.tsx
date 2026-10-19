@@ -1,263 +1,501 @@
-"use client"
+"use client";
 
 import Image from "next/image";
 import Link from "next/link";
 import { useUIStateContext } from "@/components/UIStateContext";
-import { UserRound, Star } from "lucide-react";
+import { UserRound } from "lucide-react";
 
+import { useEffect } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { Doc } from "@/convex/_generated/dataModel";
 
-const chatConsultants = [
-  {
-    id: 0,
-    avatar: "https://i.pravatar.cc/80?img=32",
-    name: "Dr. Ashley",
-    role: "Herbal expert",
-    availability: "Online",
-    date: "Jan 12"
+import { useUser } from "@clerk/nextjs";
+
+const TAGS = ["Evidence Based", "Herbal Wellness"];
+
+const HISTORY_STATUS_STYLES: Record<
+  Doc<"consultations">["status"],
+  { label: string; className: (darkMode: boolean) => string }
+> = {
+  pending: {
+    label: "Pending",
+    className: (darkMode) => (darkMode ? "bg-amber-950/40 text-amber-400" : "bg-amber-50 text-amber-700"),
   },
-  {
-    id: 1,
-    avatar: "https://i.pravatar.cc/80?img=56",
-    name: "Pharm. Greg",
-    role: "Herbal expert",
-    availability: "Online",
-    date: "Jan 12"
+  active: {
+    label: "Active",
+    className: (darkMode) => (darkMode ? "bg-green-950/40 text-green-400" : "bg-green-50 text-green-700"),
   },
-  {
-    id: 2,
-    avatar: "https://i.pravatar.cc/80?img=12",
-    name: "Dr. Timothy",
-    role: "Herbal expert",
-    availability: "Online",
-    date: "Jan 12"
+  completed: {
+    label: "Completed",
+    className: (darkMode) => (darkMode ? "bg-neutral-800 text-neutral-400" : "bg-gray-100 text-gray-500"),
   },
-]
+  expired: {
+    label: "Expired",
+    className: (darkMode) => (darkMode ? "bg-red-950/40 text-red-400" : "bg-red-50 text-red-700"),
+  },
+};
+
+function truncate(text: string, max: number) {
+  return text.length > max ? `${text.slice(0, max)}...` : text;
+}
+
+function formatTime(timestamp: number) {
+  return new Date(timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+function formatDate(timestamp: number) {
+  return new Date(timestamp).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
+}
+
+function rowClass(darkMode: boolean) {
+  return `flex flex-col gap-4 px-5 py-5 transition-colors ${darkMode ? "hover:bg-[#2b2b2b]" : "hover:bg-gray-50"}`;
+}
+
+// Fetches the consultant and appointment slot behind a consultation.
+function useConsultationDetails(consultation: Doc<"consultations">) {
+  const consultant = useQuery(api.consultants.getConsultantById, {
+    consultantId: consultation.consultantId,
+  });
+  const slot = useQuery(api.availableSlots.getSlotById, { slotId: consultation.slotId });
+
+  return { consultant, slot };
+}
+
+function Tag({ label, darkMode }: { label: string; darkMode: boolean }) {
+  return (
+    <span
+      className={`rounded-full px-3 py-1 text-[10px] font-medium ${
+        darkMode ? "bg-[#2f2f31] text-neutral-300" : "bg-gray-50 text-gray-500"
+      }`}
+    >
+      {label}
+    </span>
+  );
+}
+
+function StatusMessage({ darkMode, text }: { darkMode: boolean; text: string }) {
+  return (
+    <div className="px-5 py-8 text-center">
+      <p className={`text-sm ${darkMode ? "text-neutral-400" : "text-gray-500"}`}>{text}</p>
+    </div>
+  );
+}
+
+function ItemLoading() {
+  return (
+    <div className="px-5 py-5">
+      <p className="text-sm text-gray-500">Loading consultation...</p>
+    </div>
+  );
+}
+
+function ConsultantHeader({
+  consultant,
+  darkMode,
+  size = 44,
+}: {
+  consultant: { imageUrl?: string; fullName: string; specialization?: string };
+  darkMode: boolean;
+  size?: number;
+}) {
+  return (
+    <div className="flex items-center gap-4">
+      <div
+        className="flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200"
+        style={{ width: size, height: size }}
+      >
+        <Image
+          src={consultant.imageUrl || "/default-avatar.png"}
+          alt={consultant.fullName}
+          width={50}
+          height={50}
+          className="h-full w-full object-cover"
+        />
+      </div>
+
+      <div>
+        <h4 className={`text-sm font-bold ${darkMode ? "text-white" : "text-neutral-900"}`}>
+          {consultant.fullName}
+        </h4>
+        <p className={`text-xs ${darkMode ? "text-neutral-400" : "text-gray-500"}`}>
+          {consultant.specialization || "Herbal Wellness Consultant"}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function PendingConsultation({
+  consultation,
+  darkMode,
+}: {
+  consultation: Doc<"consultations">;
+  darkMode: boolean;
+}) {
+  const { consultant, slot } = useConsultationDetails(consultation);
+  const expirePendingConsultation = useMutation(api.consultations.expirePendingConsultation);
+
+  useEffect(() => {
+    if (!slot || consultation.status !== "pending") return;
+
+    const expireAt = slot.endTime;
+
+    async function expire() {
+      try {
+        await expirePendingConsultation({ consultationId: consultation._id });
+      } catch (error) {
+        console.error("Failed to expire consultation:", error);
+      }
+    }
+
+    // Appointment has already ended.
+    if (Date.now() >= expireAt) {
+      void expire();
+      return;
+    }
+
+    // Keep the card alive until the exact appointment end time.
+    const timeout = window.setTimeout(() => void expire(), expireAt - Date.now());
+    return () => window.clearTimeout(timeout);
+  }, [slot, consultation._id, consultation.status, expirePendingConsultation]);
+
+  if (!consultant || !slot) return <ItemLoading />;
+
+  return (
+    <div className={rowClass(darkMode)}>
+      <ConsultantHeader consultant={consultant} darkMode={darkMode} size={44} />
+
+      {/* Appointment */}
+      <div className={`rounded-xl p-4 ${darkMode ? "bg-[#181818]" : "bg-gray-50"}`}>
+        <p className="text-[10px] font-bold uppercase tracking-wider text-green-700">Requested Appointment</p>
+        <p className={`mt-2 text-sm font-semibold ${darkMode ? "text-white" : "text-neutral-900"}`}>
+          {formatDate(slot.startTime)}
+        </p>
+        <p className={`mt-1 text-xs ${darkMode ? "text-neutral-400" : "text-gray-500"}`}>
+          {formatTime(slot.startTime)} – {formatTime(slot.endTime)}
+        </p>
+      </div>
+
+      {/* Status */}
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-xs font-semibold text-amber-600">● Waiting for consultant</span>
+        <button
+          disabled
+          className={`cursor-not-allowed rounded-full px-4 py-2 text-xs font-bold ${
+            darkMode ? "bg-neutral-700 text-neutral-500" : "bg-gray-100 text-gray-400"
+          }`}
+        >
+          Waiting for Acceptance
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function ConsultationHistoryItem({ consultation, darkMode }: {
+  consultation: Doc<"consultations">;
+  darkMode: boolean;
+}) {
+  const { consultant, slot } = useConsultationDetails(consultation);
+
+  const hideExpiredConsultation = useMutation(
+      api.consultations.hideExpiredConsultation
+    );
+
+  const handleRemove = async () => {
+    try {
+      await hideExpiredConsultation({
+        consultationId: consultation._id,
+      });
+    } catch (error) {
+      console.error(
+        "Failed to remove expired consultation:",
+        error
+      );
+    }
+  };
+
+  if (!consultant || !slot) return <ItemLoading />;
+
+  const status = HISTORY_STATUS_STYLES[consultation.status];
+
+  return (
+    <div className={rowClass(darkMode)}>
+      <div className="flex items-center justify-between gap-4">
+        <ConsultantHeader consultant={consultant} darkMode={darkMode} size={40} />
+
+        <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase ${status.className(darkMode)}`}>
+          {status.label}
+        </span>
+      </div>
+
+      {/* Appointment */}
+      <div>
+        <p className={`text-sm font-semibold ${darkMode ? "text-neutral-200" : "text-neutral-800"}`}>
+          {formatDate(slot.startTime)}
+        </p>
+        <p className={`mt-1 text-xs ${darkMode ? "text-neutral-400" : "text-gray-500"}`}>
+          {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
+        </p>
+      </div>
+
+      {/* Action */}
+      {consultation.status === "pending" && (
+        <div
+          className={`rounded-lg px-3 py-2 text-xs ${
+            darkMode ? "bg-amber-950/20 text-amber-400" : "bg-amber-50 text-amber-700"
+          }`}
+        >
+          Waiting for the consultant to accept your request.
+        </div>
+      )}
+
+      {consultation.status === "active" && (
+        <Link
+          href={`/consultantchat/${consultation._id}`}
+          className="rounded-full bg-green-700 px-4 py-2 text-center text-xs font-bold text-white transition hover:bg-green-800"
+        >
+          Open Chat
+        </Link>
+      )}
+
+      {consultation.status === "completed" && (
+        <div className={`text-xs ${darkMode ? "text-neutral-500" : "text-gray-400"}`}>Consultation completed</div>
+      )}
+
+      {consultation.status === "expired" && (
+        <div
+          className={`rounded-lg px-4 py-3 ${
+            darkMode
+              ? "bg-red-950/20"
+              : "bg-red-50"
+          }`}
+        >
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p
+                className={`text-xs font-semibold ${
+                  darkMode
+                    ? "text-red-300"
+                    : "text-red-700"
+                }`}
+              >
+                Consultation expired
+              </p>
+
+              <p
+                className={`mt-1 text-xs leading-5 ${
+                  darkMode
+                    ? "text-red-300/80"
+                    : "text-red-700/80"
+                }`}
+              >
+                The consultant didn't accept
+                your request before the
+                appointment time ended.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleRemove}
+              className={`shrink-0 rounded-full border px-4 py-2 text-xs font-bold transition ${
+                darkMode
+                  ? "border-neutral-700 text-neutral-300 hover:bg-neutral-800"
+                  : "border-gray-300 bg-white text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              Remove
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function ChatConsultant() {
   const { darkMode } = useUIStateContext();
+  const { user } = useUser();
+
+  const consultants = useQuery(api.consultants.getAllConsultants);
+  const consultations = useQuery(
+    api.consultations.getUserConsultations,
+    user ? { userId: user.id } : "skip"
+  );
+
+  const visibleConsultations =
+    consultations?.filter(
+      (consultation) =>
+        consultation.hiddenFromUser !== true
+    ) ?? [];
+
+  const pendingConsultations =
+    visibleConsultations.filter(
+      (consultation) =>
+        consultation.status === "pending"
+    );
+
+  const recentConsultations = [
+    ...visibleConsultations,
+  ]
+    .sort(
+      (a, b) =>
+        b.createdAt - a.createdAt
+    )
+    .slice(0, 3);
+
+  const headingClass = darkMode ? "text-white" : "text-black";
+  const mutedClass = darkMode ? "text-neutral-300" : "text-neutral-700";
+  const listClass = `overflow-hidden border transition-all duration-300 ${
+    darkMode
+      ? "border-transparent bg-[#222224] divide-y divide-neutral-700"
+      : "border-gray-200 bg-white divide-y divide-gray-200 shadow-[0_1px_6px_rgba(0,0,0,0.06)]"
+  }`;
+
+  if (!consultants) {
+    return <p className={`px-4 ${headingClass}`}>Loading.....</p>;
+  }
 
   return (
-    <section className="px-4 py-6">
-      <div className={`mx-auto flex min-h-28.75 max-w-6xl flex-col items-center justify-center rounded-xl px-6 py-8 text-center transition-colors ${darkMode ? "bg-[#222224] text-white" : "bg-white text-black"}`}>
-        <div className={`mb-3 inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-[#f7f7f7] px-3 py-1 text-[10px] font-medium text-slate-800`}>
-          <UserRound className="w-3.5 h-3.5" />
+    <section className="px-4">
+      {/* Header */}
+      <div
+        className={`mx-auto flex min-h-28.75 max-w-6xl flex-col items-center justify-center rounded-xl px-6 py-8 text-center transition-colors ${
+          darkMode ? "bg-[#222224] text-white" : "bg-white text-black"
+        }`}
+      >
+        <div className="mb-3 inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-[#f7f7f7] px-3 py-1 text-[10px] font-medium text-slate-800">
+          <UserRound className="h-3.5 w-3.5" />
           Consultant
         </div>
 
-        <h1 className={`text-2xl font-bold leading-tight sm:text-[28px] ${darkMode ? "text-white" : "text-black"}`}>
+        <h1 className={`text-2xl font-bold leading-tight sm:text-[28px] ${headingClass}`}>
           Talk to a herbal expert
         </h1>
 
         <p className={`mt-1 max-w-md text-sm leading-5 ${darkMode ? "text-neutral-300" : "text-slate-500"}`}>
-          Choose a verified consultant for educational guidance,
+          Choose a verified consultant and book
           <br className="hidden sm:block" />
-          Not a medical service.
+          a consultation at a convenient time.
         </p>
       </div>
 
-      {/*Available Consultants*/}
+      {/* Consultants */}
       <div className="space-y-4 py-4">
         <div className="flex items-center justify-between px-1">
-          <span
-            className={`text-sm font-medium ${
-              darkMode ? "text-neutral-300" : "text-neutral-600"
-            }`}
-          >
-            {chatConsultants.length} Consultants available
+          <span className={`text-sm font-medium ${darkMode ? "text-neutral-300" : "text-neutral-600"}`}>
+            {consultants.length} Consultants available
           </span>
-
-          <Link
-            href="#"
-            className={`inline-flex items-center gap-2 text-sm font-medium ${
-              darkMode ? "text-white" : "text-[#222224]"
-            }`}
-          >
-            Sort By :
-            <span
-              className={`rounded-md px-3 py-2 text-xs font-bold ${
-                darkMode ? "bg-[#2b2b2b] text-white" : "bg-white text-black"
-              }`}
-            >
-              Recommended
-            </span>
-          </Link>
         </div>
 
-        {/* Available Consultants */}
+        {/* Consultant Cards */}
         <div className="space-y-4">
-          {chatConsultants.map((consultant) => (
+          {consultants.map((consultant) => (
             <div
-              key={consultant.id}
-              className={`
-                flex flex-col sm:flex-row items-start sm:items-start justify-between gap-4 sm:gap-6 rounded-xl border px-5 py-7 transition-all duration-200
-                ${
-                  darkMode
-                    ? "border-transparent bg-[#222224]"
-                    : "border-gray-200 bg-white shadow-[0_1px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.1)]"
-                }
-              `}
+              key={consultant._id}
+              className={`flex flex-col items-start justify-between gap-4 rounded-xl border px-5 py-7 transition-all duration-200 sm:flex-row sm:gap-6 ${
+                darkMode
+                  ? "border-transparent bg-[#222224]"
+                  : "border-gray-200 bg-white shadow-[0_1px_8px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.1)]"
+              }`}
             >
               <div className="flex items-start gap-4">
+                {/* Avatar */}
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200 text-lg shadow-inner select-none">
                   <Image
-                    src={consultant.avatar}
-                    alt={consultant.name}
+                    src={consultant.imageUrl || "/default-avatar.png"}
+                    alt={consultant.fullName}
                     width={50}
                     height={50}
                   />
                 </div>
 
+                {/* Details */}
                 <div className="space-y-2">
                   <div>
-                    <h4
-                      className={`text-base font-bold leading-tight ${
-                        darkMode ? "text-white" : "text-black"
-                      }`}
-                    >
-                      {consultant.name}
+                    <h4 className={`text-base font-bold leading-tight ${headingClass}`}>
+                      {consultant.fullName}
                     </h4>
-
-                    <p
-                      className={`mt-1 text-sm ${
-                        darkMode ? "text-neutral-300" : "text-neutral-700"
-                      }`}
-                    >
-                      {consultant.role}
+                    <p className={`mt-1 text-sm ${mutedClass}`}>
+                      {consultant.specialization || "Herbal Wellness Consultant"}
                     </p>
                   </div>
 
+                  {/* Tags */}
                   <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`rounded-full px-3 py-1 text-[10px] font-medium ${
-                        darkMode
-                          ? "bg-[#2f2f31] text-neutral-300"
-                          : "bg-gray-50 text-gray-500"
-                      }`}
-                    >
-                      Evidence Based
-                    </span>
-
-                    <span
-                      className={`rounded-full px-3 py-1 text-[10px] font-medium ${
-                        darkMode
-                          ? "bg-[#2f2f31] text-neutral-300"
-                          : "bg-gray-50 text-gray-500"
-                      }`}
-                    >
-                      Stress and sleep
-                    </span>
+                    {TAGS.map((tag) => (
+                      <Tag key={tag} label={tag} darkMode={darkMode} />
+                    ))}
                   </div>
 
-                  <div
-                    className={`flex items-center gap-2 text-xs font-medium ${
-                      darkMode ? "text-neutral-300" : "text-neutral-700"
-                    }`}
-                  >
-                    <div className="flex items-center gap-1">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-4 h-4 ${
-                            i < 4 ? "text-yellow-500 fill-yellow-500" : "text-gray-300"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                    <span className="text-[10px] text-gray-400">4.8/5</span>
-                  </div>
-
-                  <p
-                    className={`text-sm ${
-                      darkMode ? "text-neutral-300" : "text-neutral-700"
-                    }`}
-                  >
-                    Replies in under 1 hour{" "}
-                    <span className="font-semibold text-green-700">
-                      * {consultant.availability}
-                    </span>
+                  {/* Bio */}
+                  <p className={`max-w-xl text-sm ${mutedClass}`}>
+                    {consultant.bio ? truncate(consultant.bio, 100) : "Professional herbal wellness guidance."}
                   </p>
                 </div>
               </div>
-              <Link href="/consultantchat"
-                className="w-full sm:w-auto rounded-full bg-green-700 px-5 py-3 text-sm font-medium text-white transition hover:bg-green-800 cursor-pointer"
-                type="button"
-              >
-                Start Consult
-              </Link>
 
+              {/* Book Button */}
+              <Link
+                href={`/consultants/${consultant._id}`}
+                className="w-full rounded-full bg-green-700 px-5 py-3 text-center text-sm font-medium text-white transition hover:bg-green-800 sm:w-auto"
+              >
+                Book Consult
+              </Link>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Consults History */}
+      {/* Pending Consultations */}
       <div className="space-y-4 pt-14">
         <div className="flex items-center justify-between px-1">
-          <span
-            className={`text-xs font-medium uppercase tracking-wide ${
-              darkMode ? "text-white" : "text-black"
-            }`}
-          >
-            Consultant Chat History
+          <span className={`text-xs font-medium uppercase tracking-wide ${headingClass}`}>
+            Pending Consultations
           </span>
+        </div>
 
+        <div className={listClass}>
+          {consultations === undefined ? (
+            <StatusMessage darkMode={darkMode} text="Loading consultations..." />
+          ) : pendingConsultations.length === 0 ? (
+            <StatusMessage darkMode={darkMode} text="You have no pending consultations." />
+          ) : (
+            pendingConsultations.map((consultation) => (
+              <PendingConsultation key={consultation._id} consultation={consultation} darkMode={darkMode} />
+            ))
+          )}
+        </div>
+      </div>
+
+      {/* Consultation History */}
+      <div className="space-y-4 pt-14">
+        <div className="flex items-center justify-between px-1">
+          <span className={`text-xs font-medium uppercase tracking-wide ${headingClass}`}>
+            Consultation History
+          </span>
           <Link
-            href="#"
-            className={`text-sm font-bold underline ${
-              darkMode ? "text-white" : "text-green-700"
-            }`}
+            href="/consultants/history"
+            className={`text-sm font-bold underline ${darkMode ? "text-white" : "text-green-700"}`}
           >
             View All
           </Link>
         </div>
 
-        <div
-          className={`
-            overflow-hidden border transition-all duration-300
-            ${
-              darkMode
-                ? "border-transparent bg-[#222224] divide-y divide-neutral-700"
-                : "border-gray-200 bg-white divide-y divide-gray-200 shadow-[0_1px_6px_rgba(0,0,0,0.06)]"
-            }
-          `}
-        >
-          {chatConsultants.map((consultant) => (
-            <div
-              key={consultant.id}
-              className={`flex items-center justify-between gap-4 px-5 py-5 transition-colors ${
-                darkMode ? "hover:bg-[#2b2b2b]" : "hover:bg-gray-50"
-              }`}
-            >
-              <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-200 text-base shadow-inner select-none">
-                  <Image
-                    src={consultant.avatar}
-                    alt={consultant.name}
-                    width={50}
-                    height={50}
-                  />
-                </div>
-
-                <h4
-                  className={`text-sm font-bold leading-snug ${
-                    darkMode ? "text-white" : "text-black"
-                  }`}
-                >
-                  {consultant.name}
-                </h4>
-              </div>
-
-              <span
-                className={`shrink-0 text-xs font-medium uppercase ${
-                  darkMode ? "text-neutral-400" : "text-black"
-                }`}
-              >
-                {consultant.date}
-              </span>
-            </div>
-          ))}
+        <div className={listClass}>
+          {consultations === undefined ? (
+            <StatusMessage darkMode={darkMode} text="Loading consultations..." />
+          ) : visibleConsultations.length === 0 ? (
+            <StatusMessage darkMode={darkMode} text="You haven't booked a consultation yet." />
+          ) : (
+            recentConsultations.map((consultation) => (
+              <ConsultationHistoryItem key={consultation._id} consultation={consultation} darkMode={darkMode} />
+            ))
+          )}
         </div>
       </div>
     </section>
-  )
+  );
 }

@@ -1,0 +1,111 @@
+"use client";
+
+import { useMemo, useEffect } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { useUser } from "@clerk/nextjs";
+
+import { api } from "@/convex/_generated/api";
+import { useUIStateContext } from "@/components/UIStateContext";
+import ConsultationCard from "./consultationCards";
+
+interface Props {
+  tab: "pending" | "active" | "completed" | "expired";
+}
+
+export default function ConsultationQueue({ tab }: Props) {
+  const { darkMode } = useUIStateContext();
+  const { user } = useUser();
+  const expirePendingConsultation =useMutation(api.consultations.expirePendingConsultation);
+
+  const consultant = useQuery(
+    api.consultants.getCurrentConsultant,
+    user ? { clerkId: user.id } : "skip"
+  );
+
+  const consultations = useQuery(
+    api.consultations.getConsultantConsultations,
+    consultant
+      ? { consultantId: consultant._id }
+      : "skip"
+  );
+
+  useEffect(() => {
+    if (!consultations) return;
+
+    const expireMissedConsultations =
+      async () => {
+        for (const consultation of consultations) {
+          if (
+            consultation.status !==
+            "pending"
+          ) {
+            continue;
+          }
+
+          try {
+            await expirePendingConsultation({
+              consultationId:
+                consultation._id,
+            });
+          } catch (error) {
+            console.error(
+              "Failed to expire pending consultation:",
+              error
+            );
+          }
+        }
+      };
+
+    void expireMissedConsultations();
+  }, [
+    consultations,
+    expirePendingConsultation,
+  ]);
+  
+  const filteredConsultations = useMemo(() => {
+    if (!consultations) return [];
+
+    return consultations.filter(
+      (consultation) => consultation.status === tab && consultation.hiddenFromConsultant !== true
+    );
+  }, [consultations, tab]);
+
+  if (consultant === undefined || consultations === undefined) {
+    return (
+      <div className="py-10 text-center">
+        Loading consultations...
+      </div>
+    );
+  }
+
+  if (consultant === null) {
+    return (
+      <div className="py-10 text-center">
+        Consultant profile not found.
+      </div>
+    );
+  }
+
+  if (filteredConsultations.length === 0) {
+    return (
+      <div
+        className={`rounded-xl p-10 text-center ${
+          darkMode ? "bg-[#1E1E1E]" : "bg-white"
+        }`}
+      >
+        No {tab} consultations.
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {filteredConsultations.map((consultation) => (
+        <ConsultationCard
+          key={consultation._id}
+          consultation={consultation}
+        />
+      ))}
+    </div>
+  );
+}

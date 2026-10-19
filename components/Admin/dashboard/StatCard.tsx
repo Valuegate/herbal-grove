@@ -1,18 +1,18 @@
 import { ReactNode } from "react";
+import { useUIStateContext } from "@/components/UIStateContext";
 
 interface StatCardProps {
   title: string;
   value: number | string;
   icon: ReactNode;
-  darkMode: boolean;
 }
 
 export default function StatCard({
   title,
   value,
   icon,
-  darkMode,
 }: StatCardProps) {
+  const { darkMode } = useUIStateContext();
   return (
     <div
       className={`rounded-2xl border p-5 transition-all duration-200 hover:-translate-y-1 ${

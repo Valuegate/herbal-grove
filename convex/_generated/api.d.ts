@@ -9,8 +9,26 @@
  */
 
 import type * as ai_model from "../ai_model.js";
+import type * as availableSlots from "../availableSlots.js";
+import type * as careJournal from "../careJournal.js";
+import type * as certificates from "../certificates.js";
+import type * as chunk from "../chunk.js";
+import type * as consultantAvailability from "../consultantAvailability.js";
+import type * as consultants from "../consultants.js";
+import type * as consultationMessages from "../consultationMessages.js";
+import type * as consultationPresence from "../consultationPresence.js";
+import type * as consultations from "../consultations.js";
 import type * as conversations from "../conversations.js";
+import type * as dashboard from "../dashboard.js";
+import type * as documentHerbs from "../documentHerbs.js";
+import type * as documents from "../documents.js";
+import type * as herbs from "../herbs.js";
 import type * as messages from "../messages.js";
+import type * as notifications from "../notifications.js";
+import type * as research from "../research.js";
+import type * as researchChunks from "../researchChunks.js";
+import type * as researchDiscoveries from "../researchDiscoveries.js";
+import type * as saveDocuments from "../saveDocuments.js";
 
 import type {
   ApiFromModules,
@@ -20,8 +38,26 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   ai_model: typeof ai_model;
+  availableSlots: typeof availableSlots;
+  careJournal: typeof careJournal;
+  certificates: typeof certificates;
+  chunk: typeof chunk;
+  consultantAvailability: typeof consultantAvailability;
+  consultants: typeof consultants;
+  consultationMessages: typeof consultationMessages;
+  consultationPresence: typeof consultationPresence;
+  consultations: typeof consultations;
   conversations: typeof conversations;
+  dashboard: typeof dashboard;
+  documentHerbs: typeof documentHerbs;
+  documents: typeof documents;
+  herbs: typeof herbs;
   messages: typeof messages;
+  notifications: typeof notifications;
+  research: typeof research;
+  researchChunks: typeof researchChunks;
+  researchDiscoveries: typeof researchDiscoveries;
+  saveDocuments: typeof saveDocuments;
 }>;
 
 /**

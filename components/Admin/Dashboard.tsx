@@ -49,11 +49,11 @@ export default function AdminDashboard() {
         </Link>
       </div>
 
-      <StatsGrid darkMode={darkMode} />
+      <StatsGrid />
 
-      <RecentUploads darkMode={darkMode} />
+      <RecentUploads />
 
-      <QuickActions darkMode={darkMode} />
+      <QuickActions />
     </>
   );
 }
