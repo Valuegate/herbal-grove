@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -38,6 +38,11 @@ const iconBtnClass =
 export default function ConsultantSidebar({ isOpen, onClose }: SidebarProps) {
   const { darkMode } = useUIStateContext();
   const pathname = usePathname();
+  useEffect(() => {
+    if (isOpen) {
+      onClose();
+    }
+  }, [pathname]);
 
   const { signOut } = useClerk();
   const { user } = useUser();

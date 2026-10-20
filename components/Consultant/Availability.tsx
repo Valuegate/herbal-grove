@@ -98,13 +98,13 @@ export default function AvailabilityPage() {
         </div>
 
         <section className={`${cardClass} overflow-hidden ${darkMode ? "" : "shadow-sm"}`}>
-          <div className="flex items-center justify-between border-b p-6">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col gap-4 border-b p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <div className="flex min-w-0 items-start gap-3">
               <div className="rounded-xl bg-green-100 p-3">
                 <CalendarDays size={22} className="text-green-700" />
               </div>
 
-              <div>
+              <div className="min-w-0">
                 <h2 className={`font-bold ${headingClass}`}>Weekly Schedule</h2>
                 <p className={`text-sm ${mutedClass}`}>Your recurring consultation availability.</p>
               </div>
@@ -112,7 +112,7 @@ export default function AvailabilityPage() {
 
             <button
               onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-green-700 px-5 py-3 text-sm font-semibold text-white hover:bg-green-800"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-green-700 px-5 py-3 text-sm font-semibold text-white hover:bg-green-800 sm:w-auto"
             >
               <Pencil size={16} />
               Set Available Days
