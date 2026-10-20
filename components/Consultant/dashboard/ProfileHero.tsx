@@ -32,7 +32,7 @@ export default function ProfileSummary() {
 
   return (
     <div className={cardClass}>
-      <div className="flex flex-row items-center gap-10">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-6 sm:gap-10">
         <div className="relative shrink-0">
           {consultant?.imageUrl ? (
             <Image
@@ -40,7 +40,7 @@ export default function ProfileSummary() {
               alt={consultant.fullName}
               width={200}
               height={200}
-              className="w-40 h-40 rounded-2xl object-cover"
+              className="w-32 h-32 sm:w-40 sm:h-40 rounded-2xl object-cover"
             />
           ) : (
             <div
@@ -53,8 +53,8 @@ export default function ProfileSummary() {
           )}
         </div>
 
-        <div className="flex flex-1 flex-col justify-center">
-          <h2 className={`text-4xl font-bold tracking-tight ${darkMode ? "text-white" : "text-gray-900"}`}>
+        <div className="flex min-w-0 flex-1 flex-col justify-center">
+          <h2 className={`text-2xl sm:text-4xl font-bold tracking-tight wrap-break-word ${ darkMode ? "text-white" : "text-gray-900"}`}>
             {consultant?.fullName || "Complete your profile"}
           </h2>
 
@@ -62,10 +62,10 @@ export default function ProfileSummary() {
             {consultant?.specialization || "Herbal Consultant"}
           </p>
 
-          <div className="flex flex-wrap gap-3 mt-4">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 mt-4">
             <Link
               href="/consultant/profile"
-              className="bg-green-800 hover:bg-green-900 text-white px-5 py-2.5 rounded-full text-sm font-medium flex items-center gap-2 transition"
+              className="w-full sm:w-auto justify-center bg-green-800 hover:bg-green-900 text-white px-5 py-2.5 rounded-full text-sm font-medium flex items-center gap-2 transition"
             >
               <Pencil size={16} />
               Edit Profile
@@ -73,7 +73,7 @@ export default function ProfileSummary() {
 
             <Link
               href="/consultant/archive"
-              className={`px-5 py-2.5 rounded-full text-sm font-medium border transition ${
+              className={`w-full sm:w-auto text-center px-5 py-2.5 rounded-full text-sm font-medium border transition ${
                 darkMode
                   ? "border-neutral-700 text-neutral-300 hover:bg-neutral-800"
                   : "border-gray-200 text-gray-700 hover:bg-gray-50"
